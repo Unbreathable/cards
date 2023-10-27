@@ -1,4 +1,4 @@
-package com.example.cards
+package com.fajurion
 
 import io.flutter.embedding.android.FlutterActivity
 
