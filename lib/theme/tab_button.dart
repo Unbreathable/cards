@@ -61,7 +61,7 @@ class _SidebarButtonState extends State<TabButton> with TickerProviderStateMixin
             borderRadius: widget.radius,
             color: widget.selected.value == widget.label
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onBackground,
+                : Theme.of(context).colorScheme.primaryContainer,
             child: InkWell(
               borderRadius: widget.radius,
               onTap: () {

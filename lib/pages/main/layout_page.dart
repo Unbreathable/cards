@@ -1,8 +1,6 @@
-import 'dart:math';
-
-import 'package:cards/layouts/layout_manager.dart';
+import 'package:cards/pages/main/layout_add_dialog.dart';
 import 'package:cards/pages/main/layouts_tab.dart';
-import 'package:cards/theme/icon_button.dart';
+import 'package:cards/theme/fj_button.dart';
 import 'package:cards/theme/tab_button.dart';
 import 'package:cards/theme/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -18,22 +16,11 @@ class LayoutPage extends StatefulWidget {
 class _LayoutPageState extends State<LayoutPage> {
 
   final selected = "Layouts".obs;
-  List<Layout>? layouts;
 
   final tabs = {
     "Layouts": const LayoutsTab(),
     "Cards": null,
   };
-
-  @override
-  void initState() {
-    loadLayouts();
-    super.initState();
-  }
-
-  void loadLayouts() async {
-    layouts = await LayoutManager.getLayouts();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +44,7 @@ class _LayoutPageState extends State<LayoutPage> {
                       ),
                       onTap: () {
                         selected.value = "Layouts";
-          
+                        
                       },
                     ),
                     horizontalSpacing(elementSpacing),
@@ -69,19 +56,24 @@ class _LayoutPageState extends State<LayoutPage> {
                       ),
                       onTap: () {
                         selected.value = "Cards";
-          
+                        
                       }, 
                     ),
                   ],
                 ),
           
-                LoadingIconButton(
-                  icon: Icons.add,
-                  color: Get.theme.colorScheme.onPrimary,
-                  loading: false.obs,
+                FJElevatedButton(
+                  smallCorners: true,
                   onTap: () {
-          
+                    Get.dialog(const LayoutAddDialog());
                   }, 
+                  child: Row(
+                    children: [
+                      Icon(Icons.add, color: Get.theme.colorScheme.onPrimary),
+                      horizontalSpacing(elementSpacing),
+                      Text("Add", style: Get.theme.textTheme.labelMedium),
+                    ],
+                  ),
                 ),
               ],
             ),
