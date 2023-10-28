@@ -63,30 +63,83 @@ abstract class Element {
   bool scalable = false;
   final position =  const Offset(0, 0).obs;
   final size = const Size(0, 0).obs;
-  late final Map<String, dynamic> settings;
+  late final List<Setting> settings;
 
   Element(this.name, this.type, this.icon) {
-    settings = {};
+    settings = buildSettings();
     init();
   }
    Element.fromMap(this.type, this.icon, Map<String, dynamic> json) : name = json["name"] {
-    settings = json["settings"];
+    settings = [];
+    for(var setting in buildSettings()) {
+      setting.fromJson(json);
+      settings.add(setting);
+    }
     position.value = Offset(json["x"], json["y"]);
     size.value = Size(json["width"], json["height"]);
     init();
   }
   Map<String, dynamic> toMap() {
+
+    final settingsMap = <String, dynamic>{};
+    for(var setting in settings) {
+      setting.intoJson(settingsMap);
+    }
+
     return {
       "name": name,
       "x": position.value.dx,
       "y": position.value.dy,
       "width": size.value.width,
       "height": size.value.height,
-      "settings": settings
+      "settings": settingsMap
     };
   }
 
   void init();
-  void buildSettings(BuildContext context);
+  List<Setting> buildSettings();
   Widget build(BuildContext context);
+}
+
+enum SettingType {
+  number,
+  text,
+  selection,
+  file
+}
+
+class Setting<T> {
+  
+  final String name;
+  final String description;
+  final SettingType type;
+
+  /// Whether this setting should be exposed to the user when this is a template
+  final bool exposed;
+  final T _defaultValue;
+  T? _value;
+  Setting(this.name, this.description, this.type, this.exposed, this._value, this._defaultValue);
+
+  T get value => _value ?? _defaultValue;
+
+  void setValue(T value) {
+    _value = value;
+  }
+
+  void fromJson(Map<String, dynamic> json) {
+    if (json.containsKey(name)) {
+      _value = json[name];
+    }
+  }
+
+  void intoJson(Map<String, dynamic> json) {
+    if(_value != null) {
+      json[name] = _value;
+    }
+  }
+}
+
+class SelectionSetting extends Setting<int> {
+  final List<SelectableItem> options;
+  SelectionSetting(String name, String description, bool exposed, int def, this.options) : super(name, description, SettingType.selection, exposed, null, def);
 }

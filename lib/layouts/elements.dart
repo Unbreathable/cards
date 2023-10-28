@@ -1,4 +1,5 @@
 import 'package:cards/layouts/layout_manager.dart' as layout;
+import 'package:cards/theme/list_selection.dart';
 import 'package:flutter/material.dart';
 
 class ImageElement extends layout.Element {
@@ -21,8 +22,36 @@ class ImageElement extends layout.Element {
     );
   }
 
+  final iconMap = {
+    BoxFit.contain: Icons.crop_square,
+    BoxFit.cover: Icons.crop_5_4,
+    BoxFit.fill: Icons.unfold_more,
+    BoxFit.fitHeight: Icons.crop_16_9,
+    BoxFit.fitWidth: Icons.crop_din,
+    BoxFit.none: Icons.crop_free,
+    BoxFit.scaleDown: Icons.crop_landscape
+  };
+
   @override
-  void buildSettings(BuildContext context) {
+  List<layout.Setting> buildSettings() {
+    return [
+      layout.Setting<String>("image", "Pick an image", layout.SettingType.file, true, null, ""),
+      layout.SelectionSetting("fit", "Fit", true, BoxFit.values.indexOf(BoxFit.fill), 
+        List.generate(BoxFit.values.length, (index) {
+          final value = BoxFit.values[index];
+          var formattedName = value.toString();
+          for(var i = 0; i < formattedName.length; i++) {
+            if(formattedName[i].toUpperCase() == formattedName[i]) {
+              formattedName = "${formattedName.substring(0, i)} ${formattedName.substring(i).toLowerCase()}";
+              i++;
+            }
+          }
+          formattedName = formattedName.substring(0, 1).toUpperCase() + formattedName.substring(1);
+
+          return SelectableItem(formattedName, iconMap[value]!);
+        })
+      )
+    ];
   }
 }
 
@@ -42,6 +71,7 @@ class TextElement extends layout.Element {
   }
 
   @override
-  void buildSettings(BuildContext context) {
+  List<layout.Setting> buildSettings() {
+    return [];
   }
 }
