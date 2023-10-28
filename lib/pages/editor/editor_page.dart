@@ -2,9 +2,11 @@ import 'package:cards/layouts/layout_manager.dart';
 import 'package:cards/pages/editor/editor_canvas.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/pages/editor/editor_sidebar.dart';
+import 'package:cards/pages/editor/element_settings_window.dart';
 import 'package:cards/theme/vertical_spacing.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class EditorPage extends StatefulWidget {
@@ -61,9 +63,18 @@ class _EditorPageState extends State<EditorPage> {
                 const Expanded(child: SizedBox()),  
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.share),
-                      onPressed: () {},
+                    Obx(() =>
+                      Get.find<EditorController>().showSettings.value ?
+                      IconButton.filled(
+                        color: Get.theme.colorScheme.onPrimary,
+                        icon: const Icon(Icons.settings),
+                        onPressed: () => Get.find<EditorController>().showSettings.value = false,
+                      ) :
+                      IconButton(
+                        color: Get.theme.colorScheme.onPrimary,
+                        icon: const Icon(Icons.settings),
+                        onPressed: () => Get.find<EditorController>().showSettings.value = true,
+                      )
                     ),
                   ],
                 ),
@@ -115,7 +126,41 @@ class _EditorPageState extends State<EditorPage> {
                       ),
                     ),
                   ) 
-                )
+                ),
+
+                //* Other sidebar
+                Obx(() {
+                  final controller = Get.find<EditorController>();
+                  final current = controller.currentElement.value;
+                
+                  return Animate(
+                    target: controller.showSettings.value ? 1 : 0,
+                    effects: [
+                      CustomEffect(
+                        curve: Curves.easeInOut,
+                        duration: 250.ms,
+                        builder: (context, value, child) {
+                          return SizedBox(
+                            width: 380 * value,
+                            child: child,
+                          );
+                        },
+                      ),
+                      FadeEffect(
+                        curve: Curves.easeOut,
+                        delay: 150.ms,
+                        begin: 0,
+                        end: 1,
+                      )
+                    ],
+                    child: Container(
+                      width: 380,
+                      color: Get.theme.colorScheme.onBackground,
+                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                      child: current == null ? Center(child: Text("Select an element to modify", style: Get.theme.textTheme.bodyMedium)) : ElementSidebar(element: current)
+                    ),
+                  );
+                })
           
               ],
             ),

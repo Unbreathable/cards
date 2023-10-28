@@ -1,3 +1,4 @@
+import 'package:cards/pages/editor/edit_layers_window.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/pages/editor/element_add_window.dart';
 import 'package:cards/pages/editor/layer_add_window.dart';
@@ -16,7 +17,7 @@ class EditorSidebar extends StatefulWidget {
 
 class _EditorSidebarState extends State<EditorSidebar> {
   
-  final GlobalKey _addKey = GlobalKey();
+  final GlobalKey _addKey = GlobalKey(), _editKey = GlobalKey();
   final _selected = "Layers".obs;
   
   @override
@@ -49,26 +50,37 @@ class _EditorSidebarState extends State<EditorSidebar> {
               }, 
             ),
             const Expanded(child: SizedBox()),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                if(_selected.value == "Layers") {
-                  final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
-                  Get.dialog(LayerAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                }
-              }, 
+            Obx(() =>
+              Visibility(
+                visible: _selected.value == "Layers",
+                child: IconButton(
+                  key: _editKey,
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    if(_selected.value == "Layers") {
+                      final RenderBox box = _editKey.currentContext?.findRenderObject() as RenderBox;
+                      Get.dialog(EditLayersWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                    }
+                  }, 
+                ),
+              )
             ),
             horizontalSpacing(elementSpacing),
-            IconButton.filled(
-              key: _addKey,
-              color: Get.theme.colorScheme.onPrimary,
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                if(_selected.value == "Layers") {
-                  final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
-                  Get.dialog(LayerAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                }
-              }, 
+            Obx(() =>
+              Visibility(
+                visible: _selected.value == "Layers",
+                child: IconButton.filled(
+                  key: _addKey,
+                  color: Get.theme.colorScheme.onPrimary,
+                  icon: const Icon(Icons.add),
+                  onPressed: () {
+                    if(_selected.value == "Layers") {
+                      final RenderBox box = _addKey.currentContext?.findRenderObject() as RenderBox;
+                      Get.dialog(LayerAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                    }
+                  }, 
+                ),
+              )
             ),
           ],
         ),
@@ -81,8 +93,7 @@ class _EditorSidebarState extends State<EditorSidebar> {
               return ListView.builder(
                 itemCount: controller.currentLayout.value.layers.length,
                 itemBuilder: (context, index) {
-                  final reverseIndex = controller.currentLayout.value.layers.length - index - 1;
-                  final layer = controller.currentLayout.value.layers[reverseIndex];
+                  final layer = controller.currentLayout.value.layers[index];
         
                   return Padding(
                     padding: const EdgeInsets.only(bottom: sectionSpacing),
@@ -130,7 +141,7 @@ class _EditorSidebarState extends State<EditorSidebar> {
                           Visibility(
                             visible: expanded,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                              padding: const EdgeInsets.only(left: sectionSpacing),
                               child: Obx(() =>
                                 ListView.builder(
                                   shrinkWrap: true,

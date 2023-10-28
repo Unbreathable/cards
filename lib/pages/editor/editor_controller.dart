@@ -6,13 +6,28 @@ class EditorController extends GetxController {
 
   final currentLayout = Layout("name", "").obs;
   final currentElement = Rx<Element?>(null);
+  final showSettings = false.obs;
 
   void setCurrentLayout(Layout layout) {
+    showSettings.value = false;
+    currentElement.value = null;
     currentLayout.value = layout;
   }
 
+  void deleteLayer(Layer layer) {
+    currentLayout.value.layers.remove(layer);
+    save();
+  }
+
+  void reorderLayer(int oldIndex, int newIndex) {
+    final layer = currentLayout.value.layers.removeAt(oldIndex);
+    if(newIndex > oldIndex) newIndex--;
+    currentLayout.value.layers.insert(newIndex, layer);
+    save();
+  }
+
   void addLayer(Layer layer) {
-    currentLayout.value.layers.add(layer);
+    currentLayout.value.layers.insert(0, layer);
     save();
   }
 

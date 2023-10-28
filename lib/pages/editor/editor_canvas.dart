@@ -23,7 +23,8 @@ class _EditorCanvasState extends State<EditorCanvas> {
             height: controller.currentLayout.value.height.toDouble(),
             child: Stack(
               children: List.generate(controller.currentLayout.value.layers.length, (index) {
-                final layer = controller.currentLayout.value.layers[index];
+                final reverseIndex = controller.currentLayout.value.layers.length - index - 1;
+                final layer = controller.currentLayout.value.layers[reverseIndex];
                 return Stack(
                   children: List.generate(layer.elements.length, (index) {
                     final element = layer.elements[index];
