@@ -5,8 +5,9 @@ import 'package:get/get.dart';
 class SelectableItem {
   final String label;
   final IconData icon;
+  final Color? iconColor;
 
-  const SelectableItem(this.label, this.icon);
+  const SelectableItem(this.label, this.icon, {this.iconColor});
 }
 
 class ListSelection extends StatelessWidget {
@@ -49,7 +50,7 @@ class ListSelection extends StatelessWidget {
                 padding: const EdgeInsets.all(defaultSpacing),
                 child: Row(
                   children: [
-                    Icon(items[index].icon, color: Get.theme.colorScheme.onPrimary),
+                    Icon(items[index].icon, color: items[index].iconColor ?? Get.theme.colorScheme.onPrimary),
                     horizontalSpacing(defaultSpacing),
                     Text(items[index].label.tr, style: Get.theme.textTheme.bodyMedium!.copyWith(
                       color: Get.theme.colorScheme.onSurface

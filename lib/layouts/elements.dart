@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'dart:ui';
 
+import 'package:cards/layouts/color_manager.dart';
 import 'package:cards/layouts/layout_manager.dart' as layout;
+import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/theme/list_selection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +55,8 @@ class ImageElement extends layout.Element {
   @override
   List<layout.Setting> buildSettings() {
     return [
-      layout.FileSetting("image", "Pick an image", FileType.image, true),
-      layout.SelectionSetting("fit", "Pick an image fit", true, BoxFit.values.indexOf(BoxFit.cover), 
+      layout.FileSetting("image", "Image", FileType.image, true),
+      layout.SelectionSetting("fit", "Image fit", true, BoxFit.values.indexOf(BoxFit.cover), 
         List.generate(BoxFit.values.length, (index) {
           final value = BoxFit.values[index];
           var formattedName = value.toString().split(".").last;
@@ -89,15 +92,27 @@ class TextElement extends layout.Element {
   Widget build(BuildContext context) {
 
     final text = settings[0].value.value as String;
-    final align = settings[1].value.value as int;
-    final fontSize = settings[2].value.value as double;
-    final bold = settings[3].value.value as bool;
-    final italic = settings[4].value.value as bool;
+    final controller = Get.find<EditorController>();
+    final colorId = settings[1].value.value as String;
+    final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
+    final align = settings[2].value.value as int;
+    final fontSize = settings[3].value.value as double;
+    final bold = settings[4].value.value as bool;
+    final italic = settings[5].value.value as bool;
 
     return SizedBox(
       width: size.value.width,
       height: size.value.height,
-      child: Text(text, style: TextStyle(fontSize: fontSize, fontWeight: bold ? FontWeight.bold : FontWeight.normal, fontStyle: italic ? FontStyle.italic : FontStyle.normal), textAlign: alignmentMap[align],),
+      child: Text(
+        text, 
+        style: TextStyle(
+          color: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value),
+          fontSize: fontSize, 
+          fontWeight: bold ? FontWeight.bold : FontWeight.normal, 
+          fontStyle: italic ? FontStyle.italic : FontStyle.normal
+        ), 
+        textAlign: alignmentMap[align],
+      ),
     );
   }
 
@@ -111,6 +126,7 @@ class TextElement extends layout.Element {
   List<layout.Setting> buildSettings() {
     return [
       layout.TextSetting("text", "Text", true, "Some text"),
+      layout.ColorSetting("color", "Text color", false),
       layout.SelectionSetting("align", "Text alignment", false, 0, 
         [
           const SelectableItem("Left", Icons.format_align_left),
@@ -123,4 +139,81 @@ class TextElement extends layout.Element {
       layout.BoolSetting("italic", "Italic", false, false),
     ];
   }
+}
+
+class BoxElement extends layout.Element {
+
+  BoxElement(String name) : super(name, 2, Icons.crop_square);
+  BoxElement.fromMap(int type, Map<String, dynamic> json) : super.fromMap(type, Icons.crop_square, json);
+
+  @override
+  void init() {
+    scalable = true;
+    if(size.value.width == 0) size.value = const Size(100, 100);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final controller = Get.find<EditorController>();
+    final colorId = settings[0].value.value as String;
+    final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
+    final opacity = settings[1].value.value as double;
+    final borderRadius = settings[2].value.value as double;
+    final blur = settings[3].value.value as double;
+    final padding = settings[4].value.value as double;
+    final fullWidth = settings[5].value.value as bool;
+    final fullHeight = settings[6].value.value as bool;
+
+    if(fullWidth) {
+      position.value = Offset(-1, position.value.dy);
+      size.value = Size(controller.currentLayout.value.width.toDouble(), size.value.height);
+      lockX = true;
+    } else {
+      lockX = false;
+    }
+
+    if(fullHeight) {
+      position.value = Offset(position.value.dx, -1);
+      size.value = Size(size.value.width, controller.currentLayout.value.height.toDouble());
+      lockY = true;
+    } else {
+      lockY = false;
+    }
+
+    return SizedBox(
+      width: size.value.width,
+      height: size.value.height,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Padding(
+          padding: EdgeInsets.all(padding),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              color: color.getColor(opacity, controller.currentLayout.value.colorManager.saturation.value),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+              child: Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  List<layout.Setting> buildSettings() {
+    return [
+      layout.ColorSetting("color", "Color", false),
+      layout.NumberSetting("opacity", "Opacity", false, 1.0, 0.0, 1.0),
+      layout.NumberSetting("border_radius", "Border radius", false, 0.0, 0.0, 30.0),
+      layout.NumberSetting("blur", "Background blur", false, 0.0, 0.0, 20.0),
+      layout.NumberSetting("padding", "Padding", false, 0.0, 0.0, 50.0),
+      layout.BoolSetting("full_width", "Full width", true, false),
+      layout.BoolSetting("full_height", "Full height", true, false),
+    ];
+  }
+
 }

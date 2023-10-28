@@ -1,3 +1,4 @@
+import 'package:cards/pages/main/cards_tab.dart';
 import 'package:cards/pages/main/layout_add_dialog.dart';
 import 'package:cards/pages/main/layouts_tab.dart';
 import 'package:cards/theme/fj_button.dart';
@@ -19,7 +20,7 @@ class _LayoutPageState extends State<LayoutPage> {
 
   final tabs = {
     "Layouts": const LayoutsTab(),
-    "Cards": null,
+    "Cards": const CardsTab(),
   };
 
   @override

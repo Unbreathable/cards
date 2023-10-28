@@ -52,35 +52,37 @@ class _ConversationAddWindowState extends State<EditLayersWindow> {
             
                     verticalSpacing(sectionSpacing),
             
-                    ReorderableListView.builder(
-                      itemCount: layout.layers.length,
-                      shrinkWrap: true,
-                      buildDefaultDragHandles: false,
-                      onReorder: (oldIndex, newIndex) {
-                        Get.find<EditorController>().reorderLayer(oldIndex, newIndex);
-                      },
-                      itemBuilder: (context, index) {
-                        final layer = layout.layers[index];
-                        return Row(
-                          key: ValueKey(layer),
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ReorderableDragStartListener(
-                              index: index,
-                              child: Icon(Icons.drag_handle, color: Get.theme.colorScheme.onPrimary)
-                            ),
-                            horizontalSpacing(elementSpacing),
-                            Text(layer.name, style: Get.theme.textTheme.labelMedium, textHeightBehavior: noTextHeight,),
-                            const Expanded(child: SizedBox()),
-                            IconButton(
-                              onPressed: () {
-                                Get.find<EditorController>().deleteLayer(layer);
-                              }, 
-                              icon: const Icon(Icons.delete)
-                            )
-                          ],
-                        );
-                      },
+                    Obx(() =>
+                      ReorderableListView.builder(
+                        itemCount: layout.layers.length,
+                        shrinkWrap: true,
+                        buildDefaultDragHandles: false,
+                        onReorder: (oldIndex, newIndex) {
+                          Get.find<EditorController>().reorderLayer(oldIndex, newIndex);
+                        },
+                        itemBuilder: (context, index) {
+                          final layer = layout.layers[index];
+                          return Row(
+                            key: ValueKey(layer),
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ReorderableDragStartListener(
+                                index: index,
+                                child: Icon(Icons.drag_handle, color: Get.theme.colorScheme.onPrimary)
+                              ),
+                              horizontalSpacing(elementSpacing),
+                              Text(layer.name, style: Get.theme.textTheme.labelMedium, textHeightBehavior: noTextHeight,),
+                              const Expanded(child: SizedBox()),
+                              IconButton(
+                                onPressed: () {
+                                  Get.find<EditorController>().deleteLayer(layer);
+                                }, 
+                                icon: const Icon(Icons.delete)
+                              )
+                            ],
+                          );
+                        },
+                      )
                     ),
                     verticalSpacing(defaultSpacing),
                     FJElevatedButton(

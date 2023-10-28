@@ -36,7 +36,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
                         onTap: () => controller.currentElement.value = element,
                         onPanUpdate: (details) {
                           if(controller.currentElement.value == element) {
-                            element.position.value = Offset(element.position.value.dx + details.delta.dx, element.position.value.dy + details.delta.dy);
+                            element.position.value = Offset(element.position.value.dx + (element.lockX ? 0 : details.delta.dx), element.position.value.dy + (element.lockY ? 0 :details.delta.dy));
                           }
                         },
                         onPanEnd: (details) => controller.save(),

@@ -7,11 +7,20 @@ class EditorController extends GetxController {
   final currentLayout = Layout("name", "").obs;
   final currentElement = Rx<Element?>(null);
   final showSettings = false.obs;
+  final renderMode = false.obs;
 
   void setCurrentLayout(Layout layout) {
     showSettings.value = false;
     currentElement.value = null;
     currentLayout.value = layout;
+    renderMode.value = false;
+  }
+
+  void renderCurrentLayout(Layout layout) {
+    showSettings.value = false;
+    currentElement.value = null;
+    currentLayout.value = layout;
+    renderMode.value = true;
   }
 
   void deleteLayer(Layer layer) {
@@ -36,6 +45,7 @@ class EditorController extends GetxController {
     switch(type) {
       case 0: element = ImageElement(name); break;
       case 1: element = TextElement(name); break;
+      case 2: element = BoxElement(name); break;
       default: throw Exception("Unknown element type: $type");
     }
     layer.elements.add(element);

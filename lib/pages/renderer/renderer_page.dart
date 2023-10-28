@@ -3,7 +3,6 @@ import 'package:cards/pages/editor/editor_canvas.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/pages/editor/sidebar/editor_sidebar.dart';
 import 'package:cards/pages/editor/element_settings_window.dart';
-import 'package:cards/theme/fj_button.dart';
 import 'package:cards/theme/vertical_spacing.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +57,7 @@ class _EditorPageState extends State<EditorPage> {
                     ),
                   ],
                 ),
-                Icon(Icons.apps, color: Get.theme.colorScheme.onPrimary, size: 30),
+                Icon(Icons.folder_copy, color: Get.theme.colorScheme.onPrimary, size: 30),
                 horizontalSpacing(elementSpacing),
                 Text(widget.name, style: Get.theme.textTheme.titleMedium),
                 const Expanded(child: SizedBox()),  
@@ -77,18 +76,6 @@ class _EditorPageState extends State<EditorPage> {
                         onPressed: () => Get.find<EditorController>().showSettings.value = true,
                       )
                     ),
-                    horizontalSpacing(defaultSpacing),
-                    FJElevatedButton(
-                      smallCorners: true,
-                      onTap: () => Get.find<EditorController>().showSettings.value = true,
-                      child: Row(
-                        children: [
-                          Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
-                          horizontalSpacing(elementSpacing),
-                          Text("Export", style: Get.theme.textTheme.labelMedium),
-                        ],
-                      ),
-                    )
                   ],
                 ),
               ],
@@ -111,33 +98,30 @@ class _EditorPageState extends State<EditorPage> {
                 //* Editor
                 Expanded(
                   child: ClipRect(
-                    child: GestureDetector(
-                      onTap: () => Get.find<EditorController>().currentElement.value = null,
-                      child: Listener(
-                        behavior: HitTestBehavior.opaque,
-                        onPointerSignal: (event) {
-                          if(event is PointerScrollEvent) {
-                            scale.value += event.scrollDelta.dy / 100 * 0.1 * -1;
-                            if(scale.value < 0.5) scale.value = 0.5;
-                            if(scale.value > 5.0) scale.value = 5.0;
-                          }
-                        },
-                        onPointerMove: (event) {
-                          if(event.buttons == 4) {
-                            offset.value += event.delta * (1 / scale.value);
-                          }
-                        },
-                        child: Center(
-                          child: Obx(() => 
-                            layout.value != null ? Transform.scale(
-                              scale: scale.value,
-                              child: Transform.translate(
-                                offset: offset.value,
-                                child: const EditorCanvas(),
-                              ),
-                            )
-                            : Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary))
-                          ),
+                    child: Listener(
+                      behavior: HitTestBehavior.opaque,
+                      onPointerSignal: (event) {
+                        if(event is PointerScrollEvent) {
+                          scale.value += event.scrollDelta.dy / 100 * 0.1 * -1;
+                          if(scale.value < 0.5) scale.value = 0.5;
+                          if(scale.value > 5.0) scale.value = 5.0;
+                        }
+                      },
+                      onPointerMove: (event) {
+                        if(event.buttons == 4) {
+                          offset.value += event.delta * (1 / scale.value);
+                        }
+                      },
+                      child: Center(
+                        child: Obx(() => 
+                          layout.value != null ? Transform.scale(
+                            scale: scale.value,
+                            child: Transform.translate(
+                              offset: offset.value,
+                              child: const EditorCanvas(),
+                            ),
+                          )
+                          : Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary))
                         ),
                       ),
                     ),

@@ -6,6 +6,8 @@ class Layout {
   late final int width, height;
   late final layers = RxList<Layer>();
 
+  final ColorManager colorManager = ColorManager();
+
   Layout(this.name, this.path) {
     width = 0;
     height = 0;
@@ -15,6 +17,7 @@ class Layout {
     for(var layer in json["layers"]) {
       layers.add(Layer.fromMap(layer));
     }
+    colorManager.load(json["colors"] ?? {});
   }
   Map<String, dynamic> toMap() {
     List<Map<String, dynamic>> layersMap = [];
@@ -25,7 +28,8 @@ class Layout {
       "name": name,
       "width": width,
       "height": height,
-      "layers": layersMap
+      "layers": layersMap,
+      "colors": colorManager.toMap()
     };
   }
 }
@@ -63,6 +67,7 @@ abstract class Element {
   bool scalable = false;
   final position =  const Offset(0, 0).obs;
   final size = const Size(0, 0).obs;
+  bool lockX = false, lockY = false;
   late final List<Setting> settings;
 
   Element(this.name, this.type, this.icon) {
@@ -105,7 +110,8 @@ enum SettingType {
   number,
   text,
   selection,
-  file
+  file,
+  bool
 }
 
 abstract class Setting<T> {
@@ -149,7 +155,7 @@ abstract class Setting<T> {
 }
 
 class TextSetting extends Setting<String> {
-  TextSetting(String name, String description, bool exposed, String def) : super(name, description, SettingType.selection, exposed, def);
+  TextSetting(String name, String description, bool exposed, String def) : super(name, description, SettingType.text, exposed, def);
 
   TextEditingController? _controller;
 
@@ -178,7 +184,7 @@ class NumberSetting extends Setting<double> {
 
   final double min, max;
 
-  NumberSetting(String name, String description, bool exposed, double def, this.min, this.max) : super(name, description, SettingType.selection, exposed, def);
+  NumberSetting(String name, String description, bool exposed, double def, this.min, this.max) : super(name, description, SettingType.number, exposed, def);
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +197,8 @@ class NumberSetting extends Setting<double> {
         activeColor: Get.theme.colorScheme.onPrimary,
         min: min,
         max: max,
-        onChanged: (newVal) => setValue(newVal),  
+        onChanged: (newVal) => setValue(newVal),
+        onChangeEnd: (value) => Get.find<EditorController>().save(),
       )
     );
   }
@@ -199,7 +206,7 @@ class NumberSetting extends Setting<double> {
 
 class BoolSetting extends Setting<bool> {
 
-  BoolSetting(String name, String description, bool exposed, bool def) : super(name, description, SettingType.selection, exposed, def);
+  BoolSetting(String name, String description, bool exposed, bool def) : super(name, description, SettingType.bool, exposed, def);
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +221,10 @@ class BoolSetting extends Setting<bool> {
             hoverColor: Get.theme.hoverColor,
             thumbColor: MaterialStateColor.resolveWith((states) => states.contains(MaterialState.selected) ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.surface),
             value: value.value ?? _defaultValue,
-            onChanged: (newVal) => setValue(newVal),  
+            onChanged: (newVal) {
+              setValue(newVal);
+              Get.find<EditorController>().save();
+            }, 
           )
         ),
       ],
@@ -250,6 +260,7 @@ class FileSetting extends Setting<String> {
             final result = await fp.FilePicker.platform.pickFiles(type: fileType);
             if(result != null && result.paths.isNotEmpty) {
               setValue(result.paths.first!);
+              Get.find<EditorController>().save();
             }
           },
         )
@@ -269,6 +280,29 @@ class SelectionSetting extends Setting<int> {
       items: options,
       callback: (newVal, index) {
         setValue(index);
+        Get.find<EditorController>().save();
+      },
+    ));
+  }
+}
+
+// String is the id of the color
+class ColorSetting extends Setting<String> {
+  ColorSetting(String name, String description, bool exposed) : super(name, description, SettingType.selection, exposed, "");
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<EditorController>();
+
+    return Obx(() => ListSelection(
+      currentIndex: controller.currentLayout.value.colorManager.colors.keys.toList().indexOf(value.value ?? _defaultValue),
+      items: List.generate(controller.currentLayout.value.colorManager.colors.length, (index) {
+        final color = controller.currentLayout.value.colorManager.colors.values.toList()[index];
+        return SelectableItem(color.name, Icons.color_lens, iconColor: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value));
+      }),
+      callback: (newVal, index) {
+        setValue(controller.currentLayout.value.colorManager.colors.keys.toList()[index]);
+        Get.find<EditorController>().save();
       },
     ));
   }

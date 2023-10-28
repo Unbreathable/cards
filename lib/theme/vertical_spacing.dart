@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,4 +34,13 @@ String formatTime(DateTime time) {
     return "time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0"),
     "day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
   }
+}
+
+const availableChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+String generateRandomString(int length) {
+  final random = Random();
+  final randomString = List.generate(length,
+      (index) => availableChars[random.nextInt(availableChars.length)]).join();
+
+  return randomString;
 }

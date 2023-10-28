@@ -2,34 +2,25 @@ import 'package:cards/layouts/layout_manager.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/theme/fj_button.dart';
 import 'package:cards/theme/fj_textfield.dart';
-import 'package:cards/theme/list_selection.dart';
 import 'package:cards/theme/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ElementAddWindow extends StatefulWidget {
+class ColorAddWindow extends StatefulWidget {
 
-  final Layer layer;
   final Offset position;
   
-  const ElementAddWindow({super.key, required this.layer, required this.position});
+  const ColorAddWindow({super.key, required this.position});
 
   @override
-  State<ElementAddWindow> createState() => _ConversationAddWindowState();
+  State<ColorAddWindow> createState() => _ConversationAddWindowState();
 }
 
-class _ConversationAddWindowState extends State<ElementAddWindow> {
+class _ConversationAddWindowState extends State<ColorAddWindow> {
 
   final _controller = TextEditingController();
   final revealSuccess = false.obs;
   final _error = Rx<String?>(null);
-
-  final current = 0.obs;
-  final items = [
-    const SelectableItem("Image", Icons.image),
-    const SelectableItem("Text", Icons.text_fields),
-    const SelectableItem("Box", Icons.crop_square),
-  ];
 
   @override
   void dispose() {
@@ -56,29 +47,15 @@ class _ConversationAddWindowState extends State<ElementAddWindow> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Add an element", style: Get.theme.textTheme.titleMedium),
-                    verticalSpacing(sectionSpacing),
-
-                    Text("Pick a type of element", style: Get.theme.textTheme.bodyMedium),
-                    verticalSpacing(defaultSpacing),
-                    Obx(() =>
-                      ListSelection(
-                        currentIndex: current.value, 
-                        items: items,
-                        callback: (item, index) {
-                          current.value = index;
-                        },
-                      )
-                    ),
+            
+                    Text("Add a color", style: Get.theme.textTheme.titleMedium),
+            
                     verticalSpacing(sectionSpacing),
             
-                    Text("Enter a name for your element", style: Get.theme.textTheme.bodyMedium),
-                    verticalSpacing(defaultSpacing),
-
                     Obx(() =>
                       FJTextField(
                         controller: _controller,
-                        hintText: "Element name",  
+                        hintText: "Color name",  
                         errorText: _error.value,
                       )
                     ),
@@ -91,10 +68,10 @@ class _ConversationAddWindowState extends State<ElementAddWindow> {
                           return;
                         }
 
-                        Get.find<EditorController>().addElement(widget.layer, current.value, _controller.text);
+                        Get.find<EditorController>().currentLayout.value.colorManager.addColor(_controller.text);
                         Get.back();
                       }, 
-                      child: Center(child: Text("Create element", style: Get.theme.textTheme.labelLarge)),
+                      child: Center(child: Text("Create", style: Get.theme.textTheme.labelLarge)),
                     )
                   ],
                 ),
