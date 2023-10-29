@@ -211,8 +211,8 @@ class BoxElement extends layout.Element {
       layout.NumberSetting("border_radius", "Border radius", false, 0.0, 0.0, 30.0),
       layout.NumberSetting("blur", "Background blur", false, 0.0, 0.0, 20.0),
       layout.NumberSetting("padding", "Padding", false, 0.0, 0.0, 50.0),
-      layout.BoolSetting("full_width", "Full width", true, false),
-      layout.BoolSetting("full_height", "Full height", true, false),
+      layout.BoolSetting("full_width", "Full width", false, false),
+      layout.BoolSetting("full_height", "Full height", false, false),
     ];
   }
 

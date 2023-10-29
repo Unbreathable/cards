@@ -20,7 +20,7 @@ class _LayoutPageState extends State<LayoutPage> {
 
   final tabs = {
     "Layouts": const LayoutsTab(),
-    "Cards": const CardsTab(),
+    "Exported cards": const CardsTab(),
   };
 
   @override
@@ -51,12 +51,12 @@ class _LayoutPageState extends State<LayoutPage> {
                     horizontalSpacing(elementSpacing),
                     TabButton(
                       selected: selected,
-                      label: "Cards",
+                      label: "Exported cards",
                       radius: const BorderRadius.only(
                         topRight: Radius.circular(defaultSpacing),
                       ),
                       onTap: () {
-                        selected.value = "Cards";
+                        selected.value = "Exported cards";
                         
                       }, 
                     ),

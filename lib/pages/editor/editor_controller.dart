@@ -16,7 +16,7 @@ class EditorController extends GetxController {
     renderMode.value = false;
   }
 
-  void renderCurrentLayout(Layout layout) {
+  void loadFromExported(ExportedLayout layout) {
     showSettings.value = false;
     currentElement.value = null;
     currentLayout.value = layout;
@@ -58,7 +58,11 @@ class EditorController extends GetxController {
   }
 
   void save() {
-    LayoutManager.saveLayout(currentLayout.value);
+    if(renderMode.value) {
+      LayoutManager.saveExportedLayout(currentLayout.value as ExportedLayout);
+    } else {
+      LayoutManager.saveLayout(currentLayout.value);
+    }
   }
 
   void selectElement(Element element) {

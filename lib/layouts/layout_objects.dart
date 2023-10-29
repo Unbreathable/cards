@@ -1,7 +1,39 @@
 part of 'layout_manager.dart';
 
+class ExportedLayout extends Layout {
+
+  final String currentPath;
+
+  ExportedLayout(String name, String path, this.currentPath) : super(name, path);
+  ExportedLayout.fromMap(this.currentPath, String exportedPath, Map<String, dynamic> json) : super.fromMap(exportedPath, json) {
+    loadInTemplates(currentPath);
+  }
+
+  void loadInTemplates(String path) async {
+    final file = File(path);
+    final content = await file.readAsString();
+    final json = jsonDecode(content);
+    name = json["name"];
+    loadFromExported(json);
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    final map = super.toMap();
+    map["path"] = path;
+    return map;
+  }
+
+  void loadFromExported(Map<String, dynamic> json) {
+    for(var layer in layers) {
+      layer.loadFromExported(json["layers"][layers.indexOf(layer)]);
+    }
+    colorManager.loadFromExported(json["colors"] ?? {});
+  }
+}
+
 class Layout {
-  final String name;
+  String name;
   final String path;
   late final int width, height;
   late final layers = RxList<Layer>();
@@ -57,6 +89,12 @@ class Layer {
       "elements": elementsMap
     };
   }
+
+  void loadFromExported(Map<String, dynamic> json) {
+    for(var element in elements) {
+      element.loadFromExported(json["elements"][elements.indexOf(element)]);
+    }
+  }
 }
 
 abstract class Element {
@@ -99,6 +137,13 @@ abstract class Element {
       "height": size.value.height,
       "settings": settingsMap
     };
+  }
+
+  void loadFromExported(Map<String, dynamic> json) {
+    for(var setting in settings) {
+      if(!setting.exposed) return;
+      setting.fromJson(json["settings"]);
+    }
   }
 
   void init();

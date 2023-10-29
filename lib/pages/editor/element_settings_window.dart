@@ -31,6 +31,7 @@ class _ConversationAddWindowState extends State<ElementSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<EditorController>();
 
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
@@ -48,6 +49,10 @@ class _ConversationAddWindowState extends State<ElementSidebar> {
               final setting = widget.element.settings[index];
               final last = index == widget.element.settings.length - 1;
               settings.add(setting);
+
+              if(!setting.exposed && controller.renderMode.value) {
+                return Container();
+              }
     
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

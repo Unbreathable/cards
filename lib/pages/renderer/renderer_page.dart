@@ -3,27 +3,29 @@ import 'package:cards/pages/editor/editor_canvas.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/pages/editor/sidebar/editor_sidebar.dart';
 import 'package:cards/pages/editor/element_settings_window.dart';
+import 'package:cards/pages/renderer/layout_render_dialog.dart';
+import 'package:cards/theme/fj_button.dart';
 import 'package:cards/theme/vertical_spacing.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-class EditorPage extends StatefulWidget {
+class RendererPage extends StatefulWidget {
 
   final String name;
 
-  const EditorPage({super.key, required this.name});
+  const RendererPage({super.key, required this.name});
 
   @override
-  State<EditorPage> createState() => _EditorPageState();
+  State<RendererPage> createState() => _EditorPageState();
 }
 
-class _EditorPageState extends State<EditorPage> {
+class _EditorPageState extends State<RendererPage> {
 
   final scale = Rx<double>(1.0);
   final offset = Rx<Offset>(Offset.zero);
-  final layout = Rx<Layout?>(null);
+  final layout = Rx<ExportedLayout?>(null);
 
   @override
   void initState() {
@@ -32,8 +34,8 @@ class _EditorPageState extends State<EditorPage> {
   }
 
   void loadLayout() async {
-    layout.value = await LayoutManager.loadLayout(widget.name);
-    Get.find<EditorController>().setCurrentLayout(layout.value!);
+    layout.value = await LayoutManager.loadExportedLayout(widget.name);
+    Get.find<EditorController>().loadFromExported(layout.value!);
   }
 
   @override
@@ -58,7 +60,7 @@ class _EditorPageState extends State<EditorPage> {
                   ],
                 ),
                 Icon(Icons.folder_copy, color: Get.theme.colorScheme.onPrimary, size: 30),
-                horizontalSpacing(elementSpacing),
+                horizontalSpacing(defaultSpacing),
                 Text(widget.name, style: Get.theme.textTheme.titleMedium),
                 const Expanded(child: SizedBox()),  
                 Row(
@@ -76,6 +78,18 @@ class _EditorPageState extends State<EditorPage> {
                         onPressed: () => Get.find<EditorController>().showSettings.value = true,
                       )
                     ),
+                    horizontalSpacing(defaultSpacing),
+                    FJElevatedButton(
+                      smallCorners: true,
+                      onTap: () => Get.dialog(const LayoutRenderDialog()),
+                      child: Row(
+                        children: [
+                          Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
+                          horizontalSpacing(elementSpacing),
+                          Text("Render", style: Get.theme.textTheme.labelMedium),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ],

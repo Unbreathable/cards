@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EditorCanvas extends StatefulWidget {
+
   const EditorCanvas({super.key});
 
   @override
@@ -28,6 +29,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
                 return Stack(
                   children: List.generate(layer.elements.length, (index) {
                     final element = layer.elements[index];
+
                     return Obx(() => Positioned(
                       left: element.position.value.dx.toDouble(),
                       top: element.position.value.dy.toDouble(),
@@ -35,7 +37,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
                         dragStartBehavior: DragStartBehavior.start,
                         onTap: () => controller.currentElement.value = element,
                         onPanUpdate: (details) {
-                          if(controller.currentElement.value == element) {
+                          if(controller.currentElement.value == element && !controller.renderMode.value) {
                             element.position.value = Offset(element.position.value.dx + (element.lockX ? 0 : details.delta.dx), element.position.value.dy + (element.lockY ? 0 :details.delta.dy));
                           }
                         },
@@ -53,7 +55,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
                               child: element.build(context)
                             ),
                             Visibility(
-                              visible: element.scalable && controller.currentElement.value == element,
+                              visible: element.scalable && controller.currentElement.value == element && !controller.renderMode.value,
                               child: Positioned(
                                 bottom: 0,
                                 right: 0,

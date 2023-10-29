@@ -35,6 +35,39 @@ class LayoutManager {
     return directory.path;
   }
 
+  static Future<String> _getExportPath() async {
+    final path = await getApplicationSupportDirectory();
+    final directory = await Directory("${path.path}/layouts/exported").create();
+    return directory.path;
+  }
+
+  static Future<bool> exportLayout(Layout layout, String name) async {
+    final path = await _getExportPath();
+    final map = layout.toMap();
+    map["name"] = name;
+    map["path"] = layout.path;
+    final file = File("$path/$name.elay");
+    await file.writeAsString(jsonEncode(map));
+    return true;
+  }
+
+  static Future<bool> saveExportedLayout(ExportedLayout layout) async {
+    final path = await _getExportPath();
+    final map = layout.toMap();
+    final file = File("$path/${layout.name}.elay");
+    await file.writeAsString(jsonEncode(map));
+    return true;
+  }
+
+  static Future<ExportedLayout> loadExportedLayout(String name) async {
+    final path = await _getExportPath();
+    final file = File("$path/$name.elay");
+    final json = jsonDecode(await file.readAsString());
+    final mainFile = File(json["path"]);
+    final mainJson = jsonDecode(await mainFile.readAsString());
+    return ExportedLayout.fromMap(file.path, json["path"], mainJson);
+  }
+
   static Future<bool> saveLayout(Layout layout) async {
     final path = await _getPath();
     final map = layout.toMap();
@@ -61,6 +94,25 @@ class LayoutManager {
         var name = args.last;
         if(name.endsWith(".lay")) {
           name = name.substring(0, name.length - 4);
+          layouts.add(name);
+        }
+      }
+    }
+    
+    return layouts;
+  }
+
+  static Future<List<String>> getExportedLayouts() async {
+    final directory = Directory(await _getExportPath());
+    final layouts = <String>[];
+    for(var element in directory.listSync(followLinks: false)) {
+      if(element is File) {
+        final file = File(element.path);
+        final filePath = file.path.split("/").last;
+        final args = filePath.split("\\");
+        var name = args.last;
+        if(name.endsWith(".elay")) {
+          name = name.substring(0, name.length - 5);
           layouts.add(name);
         }
       }

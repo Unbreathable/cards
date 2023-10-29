@@ -39,6 +39,12 @@ class ColorManager {
     colors.remove(id);
     Get.find<EditorController>().save();
   }
+
+  void loadFromExported(Map<String, dynamic> json) {
+    for(var color in json["colors"]) {
+      colors[color["id"]] = PickedColor.fromMap(color);
+    }
+  }
 }
 
 class PickedColor {

@@ -1,6 +1,7 @@
 import 'package:cards/layouts/layout_manager.dart';
 import 'package:cards/pages/editor/editor_canvas.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
+import 'package:cards/pages/editor/layout_export_dialog.dart';
 import 'package:cards/pages/editor/sidebar/editor_sidebar.dart';
 import 'package:cards/pages/editor/element_settings_window.dart';
 import 'package:cards/theme/fj_button.dart';
@@ -61,7 +62,109 @@ class _EditorPageState extends State<EditorPage> {
                 Icon(Icons.apps, color: Get.theme.colorScheme.onPrimary, size: 30),
                 horizontalSpacing(elementSpacing),
                 Text(widget.name, style: Get.theme.textTheme.titleMedium),
-                const Expanded(child: SizedBox()),  
+                const Expanded(child: SizedBox()),
+                
+                //* Current selected toolbar
+                Obx(() {
+                  final controller = Get.find<EditorController>();
+
+                  return Visibility(
+                    visible: controller.currentElement.value != null,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () {
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(element.position.value.dx - 1, element.position.value.dy);
+                          }
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_forward),
+                          onPressed: () {
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(element.position.value.dx + 1, element.position.value.dy);
+                          },
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_upward),
+                          onPressed: () {
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(element.position.value.dx, element.position.value.dy - 1);
+                          }
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_downward),
+                          onPressed: () {
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(element.position.value.dx, element.position.value.dy + 1);
+                          }
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.align_horizontal_left),
+                          onPressed: () {
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(0, element.position.value.dy);
+                          }
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.align_horizontal_center),
+                          onPressed: () {
+                            final layoutWidth = controller.currentLayout.value.width;
+                            final width = controller.currentElement.value!.size.value.width;
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(layoutWidth/2 - width/2, element.position.value.dy);
+                          },
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.align_horizontal_right),
+                          onPressed: () {
+                            final layoutWidth = controller.currentLayout.value.width;
+                            final width = controller.currentElement.value!.size.value.width;
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(layoutWidth - width - 2, element.position.value.dy);
+                          }
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.align_vertical_top),
+                          onPressed: () {
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(element.position.value.dx, 0);
+                          },
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.align_vertical_center),
+                          onPressed: () {
+                            final layoutHeight = controller.currentLayout.value.height;
+                            final height = controller.currentElement.value!.size.value.height;
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(element.position.value.dx, layoutHeight/2 - height/2);
+                          },
+                        ),
+                        horizontalSpacing(elementSpacing),
+                        IconButton(
+                          icon: const Icon(Icons.align_vertical_bottom),
+                          onPressed: () {
+                            final layoutHeight = controller.currentLayout.value.height;
+                            final height = controller.currentElement.value!.size.value.height;
+                            final element = controller.currentElement.value!;
+                            element.position.value = Offset(element.position.value.dx, layoutHeight - height - 2);
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+
+                const Expanded(child: SizedBox()),
                 Row(
                   children: [
                     Obx(() =>
@@ -80,7 +183,7 @@ class _EditorPageState extends State<EditorPage> {
                     horizontalSpacing(defaultSpacing),
                     FJElevatedButton(
                       smallCorners: true,
-                      onTap: () => Get.find<EditorController>().showSettings.value = true,
+                      onTap: () => Get.dialog(const LayoutExportDialog()),
                       child: Row(
                         children: [
                           Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),

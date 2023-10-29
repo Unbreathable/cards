@@ -1,4 +1,5 @@
 import 'package:cards/pages/editor/edit_layers_window.dart';
+import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/pages/editor/layer_add_window.dart';
 import 'package:cards/pages/editor/sidebar/sidebar_element_tab.dart';
 import 'package:cards/pages/editor/sidebar/sidebar_settings_tab.dart';
@@ -26,6 +27,8 @@ class _EditorSidebarState extends State<EditorSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<EditorController>();
+
     return Column(
       children: [
         Row(
@@ -56,7 +59,7 @@ class _EditorSidebarState extends State<EditorSidebar> {
             const Expanded(child: SizedBox()),
             Obx(() =>
               Visibility(
-                visible: _selected.value == "Layers",
+                visible: _selected.value == "Layers" && !controller.renderMode.value,
                 child: IconButton(
                   key: _editKey,
                   icon: const Icon(Icons.edit),
@@ -72,7 +75,7 @@ class _EditorSidebarState extends State<EditorSidebar> {
             horizontalSpacing(elementSpacing),
             Obx(() =>
               Visibility(
-                visible: _selected.value == "Layers",
+                visible: _selected.value == "Layers" && !controller.renderMode.value,
                 child: IconButton.filled(
                   key: _addKey,
                   color: Get.theme.colorScheme.onPrimary,

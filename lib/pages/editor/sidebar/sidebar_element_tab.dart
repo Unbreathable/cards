@@ -54,13 +54,16 @@ class _SidebarElementTabState extends State<SidebarElementTab> {
                         Text(layer.name, style: Get.theme.textTheme.labelMedium, textHeightBehavior: noTextHeight,),
                         const Expanded(child: SizedBox()),
             
-                        IconButton(
-                          key: addKey,
-                          onPressed: () {
-                            final RenderBox box = addKey.currentContext?.findRenderObject() as RenderBox;
-                            Get.dialog(ElementAddWindow(layer: layer, position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                          }, 
-                          icon: const Icon(Icons.add)
+                        Visibility(
+                          visible: !controller.renderMode.value,
+                          child: IconButton(
+                            key: addKey,
+                            onPressed: () {
+                              final RenderBox box = addKey.currentContext?.findRenderObject() as RenderBox;
+                              Get.dialog(ElementAddWindow(layer: layer, position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
+                            }, 
+                            icon: const Icon(Icons.add)
+                          ),
                         ),
                       ],
                     ),
@@ -95,11 +98,18 @@ class _SidebarElementTabState extends State<SidebarElementTab> {
                                             horizontalSpacing(elementSpacing),
                                             Text(layer.elements[index].name, style: controller.currentElement.value == layer.elements[index] ? Get.theme.textTheme.labelMedium : Get.theme.textTheme.bodyMedium, textHeightBehavior: noTextHeight,),
                                             const Expanded(child: SizedBox()),
-                                            IconButton(
-                                              onPressed: () {
-                                                controller.deleteElement(layer, layer.elements[index]);
-                                              }, 
-                                              icon: const Icon(Icons.delete)
+                                            Visibility(
+                                              visible: !controller.renderMode.value,
+                                              replacement: IconButton(
+                                                onPressed: () {},
+                                                icon: const Icon(Icons.delete, color: Colors.transparent)
+                                              ),
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  controller.deleteElement(layer, layer.elements[index]);
+                                                }, 
+                                                icon: const Icon(Icons.delete)
+                                              ),
                                             ),
                                           ],
                                         ),

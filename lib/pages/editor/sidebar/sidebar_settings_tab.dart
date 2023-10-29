@@ -144,18 +144,25 @@ class _SidebarSettingsTabState extends State<SidebarSettingsTab> {
           ),
           verticalSpacing(defaultSpacing),
 
-          Text("Saturation", style: Get.theme.textTheme.bodyMedium, textHeightBehavior: noTextHeight),
-          Obx(() =>
-            FJSlider(
-              min: 0.0,
-              max: 1.0,
-              value: controller.currentLayout.value.colorManager.saturation.value,
-              onChanged: (newVal) => controller.currentLayout.value.colorManager.saturation.value = newVal,
-              onChangeEnd: (finalVal) => controller.save(),
+          Visibility(
+            visible: !controller.renderMode.value,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Saturation", style: Get.theme.textTheme.bodyMedium, textHeightBehavior: noTextHeight),
+                Obx(() =>
+                  FJSlider(
+                    min: 0.0,
+                    max: 1.0,
+                    value: controller.currentLayout.value.colorManager.saturation.value,
+                    onChanged: (newVal) => controller.currentLayout.value.colorManager.saturation.value = newVal,
+                    onChangeEnd: (finalVal) => controller.save(),
+                  )
+                ),
+                verticalSpacing(defaultSpacing),
+              ],
             )
-          ),
-          verticalSpacing(defaultSpacing),
-
+          )
         ],
       ),
     );
