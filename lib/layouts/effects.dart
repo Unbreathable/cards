@@ -204,9 +204,10 @@ class InheritPositionEffect extends Effect {
       return;
     }
 
+    final extra = double.tryParse(this.extra.value.value ?? "0") ?? 0.0;
     element.position.value = Offset(
-      inheritX.value.value == true ? parent.position.value.dx + double.tryParse(extra.value.value ?? "0")! : element.position.value.dx,
-      inheritY.value.value == true ? parent.position.value.dy + double.tryParse(extra.value.value ?? "0")! : element.position.value.dy,
+      inheritX.value.value == true ? parent.position.value.dx + extra : element.position.value.dx,
+      inheritY.value.value == true ? parent.position.value.dy + extra : element.position.value.dy,
     );
   }
 
