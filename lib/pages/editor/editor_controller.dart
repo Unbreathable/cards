@@ -46,6 +46,7 @@ class EditorController extends GetxController {
       case 0: element = ImageElement(name); break;
       case 1: element = TextElement(name); break;
       case 2: element = BoxElement(name); break;
+      case 3: element = ParagraphElement(name); break;
       default: throw Exception("Unknown element type: $type");
     }
     layer.addElement(element);
@@ -53,7 +54,7 @@ class EditorController extends GetxController {
   }
 
   void deleteElement(Layer layer, Element element) {
-    layer.elements.remove(element);
+    layer.elements.remove(element.id);
     save();
   }
 

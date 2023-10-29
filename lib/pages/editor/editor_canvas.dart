@@ -32,6 +32,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
 
                     return Obx(() {
 
+                      element.preProcess();
                       for(var effect in element.effects) {
                         effect.preProcess(element);
                       }

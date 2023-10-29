@@ -8,13 +8,14 @@ class FJTextField extends StatefulWidget {
   final bool obscureText;
   final bool animation;
   final String? hintText;
+  final int maxLines;
   final String? errorText;
   // Uses the secondary background color instead of the primary
   final bool secondaryColor;
   final bool small;
   final TextEditingController? controller;
 
-  const FJTextField({super.key, this.controller, this.hintText, this.errorText, this.animation = true, this.secondaryColor = false, this.small = false, this.obscureText = false});
+  const FJTextField({super.key, this.controller, this.hintText, this.errorText, this.animation = true, this.secondaryColor = false, this.small = false, this.obscureText = false, this.maxLines = 1});
 
   @override
   State<FJTextField> createState() => _FJTextFieldState();
@@ -66,6 +67,7 @@ class _FJTextFieldState extends State<FJTextField> {
               errorText: widget.errorText,
               border: InputBorder.none,
             ),
+            maxLines: widget.maxLines,
             style: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
             obscureText: widget.obscureText,
             autocorrect: false,

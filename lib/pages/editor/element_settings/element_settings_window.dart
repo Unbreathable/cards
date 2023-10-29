@@ -104,6 +104,7 @@ class _ConversationAddWindowState extends State<ElementSidebar> {
           verticalSpacing(defaultSpacing),
 
           Obx(() =>
+            controller.renderMode.value ? Container() :
             ReorderableListView.builder(
               itemCount: widget.element.effects.length,
               shrinkWrap: true,

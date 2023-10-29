@@ -1,4 +1,3 @@
-import 'package:cards/layouts/layout_manager.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/theme/fj_button.dart';
 import 'package:cards/theme/fj_textfield.dart';

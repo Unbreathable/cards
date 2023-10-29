@@ -11,6 +11,7 @@ Effect effectFromMap(Map<String, dynamic> json) {
     case 1: return AlignmentEffect.fromMap(json);
     case 2: return InheritSizeEffect.fromMap(json);
     case 3: return InheritPositionEffect.fromMap(json);
+    case 4: return ElementAlignmentEffect.fromMap(json);
     default: throw Exception("Unknown effect type: $type");
   }
 }
@@ -52,7 +53,7 @@ abstract class Effect {
 //* Effects
 class PaddingEffect extends Effect {
 
-  final padding = layout.NumberSetting("padding", "Padding", false, 0.0, 0.0, 50.0);
+  final padding = layout.TextSetting("padding", "Padding", false, "0");
 
   PaddingEffect() : super(0, "Padding", Icons.padding);
   PaddingEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Padding", Icons.padding, json);
@@ -67,8 +68,9 @@ class PaddingEffect extends Effect {
 
   @override
   Widget apply(layout.Element element, Widget child) {
+    final paddingVal = double.tryParse(padding.value.value ?? "0") ?? 0.0;
     return Padding(
-      padding: EdgeInsets.all(padding.value.value ?? 0.0),
+      padding: EdgeInsets.all(paddingVal),
       child: child,
     );
   }
@@ -126,13 +128,16 @@ class AlignmentEffect extends Effect {
 class InheritSizeEffect extends Effect {
 
   final element = layout.ElementSetting("element", "Element", false);
+  final inheritWidth = layout.BoolSetting("inheritWidth", "Inherit width", false, true);
+  final inheritHeight = layout.BoolSetting("inheritHeight", "Inherit height", false, true);
+  final extra = layout.TextSetting("extra", "Extra spacing", false, "0");
 
   InheritSizeEffect() : super(2, "Inherit size", Icons.crop_square);
   InheritSizeEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Inherit size", Icons.crop_square, json);
 
   @override
   List<layout.Setting> buildSettings() {
-    return [element];
+    return [element, inheritWidth, inheritHeight, extra];
   }
 
   @override
@@ -151,7 +156,15 @@ class InheritSizeEffect extends Effect {
       }
     }
 
-    element.size.value = (parent ?? element).size.value;
+    if(parent == null) {
+      return;
+    }
+
+    final extra = double.tryParse(this.extra.value.value ?? "0") ?? 0.0;
+    element.size.value = Size(
+      inheritWidth.value.value == true ? parent.size.value.width + extra : element.size.value.width,
+      inheritHeight.value.value == true ? parent.size.value.height + extra : element.size.value.height,
+    );
   }
 
 }
@@ -159,13 +172,16 @@ class InheritSizeEffect extends Effect {
 class InheritPositionEffect extends Effect {
 
   final element = layout.ElementSetting("element", "Element", false);
+  final inheritX = layout.BoolSetting("inheritX", "Inherit X", false, true);
+  final inheritY = layout.BoolSetting("inheritY", "Inherit Y", false, true);
+  final extra = layout.TextSetting("extra", "Extra addition", false, "0");
 
   InheritPositionEffect() : super(3, "Inherit position", Icons.radar);
   InheritPositionEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Inherit position", Icons.radar, json);
 
   @override
   List<layout.Setting> buildSettings() {
-    return [element];
+    return [element, inheritX, inheritY, extra];
   }
 
   @override
@@ -184,7 +200,64 @@ class InheritPositionEffect extends Effect {
       }
     }
 
-    element.position.value = (parent ?? element).position.value;
+    if(parent == null) {
+      return;
+    }
+
+    element.position.value = Offset(
+      inheritX.value.value == true ? parent.position.value.dx + double.tryParse(extra.value.value ?? "0")! : element.position.value.dx,
+      inheritY.value.value == true ? parent.position.value.dy + double.tryParse(extra.value.value ?? "0")! : element.position.value.dy,
+    );
+  }
+
+}
+
+class ElementAlignmentEffect extends Effect {
+
+  final element = layout.ElementSetting("element", "Element", false);
+  final alignment = layout.SelectionSetting("alignment", "Alignment", false, 0, 
+    [
+      const SelectableItem("Top", Icons.arrow_upward),
+      const SelectableItem("Bottom", Icons.arrow_downward),
+      const SelectableItem("Left", Icons.arrow_back),
+      const SelectableItem("Right", Icons.arrow_forward),
+    ]
+  );
+  final spacing = layout.TextSetting("spacing", "Spacing", false, "0");
+
+  ElementAlignmentEffect() : super(4, "Element alignment", Icons.arrow_downward);
+  ElementAlignmentEffect.fromMap(Map<String, dynamic> json) : super.fromMap("Element alignment", Icons.arrow_downward, json);
+
+  @override
+  List<layout.Setting> buildSettings() {
+    return [element, alignment, spacing];
+  }
+
+  @override
+  void preProcess(layout.Element element) {
+    final target = this.element.value.value as String;
+
+    // Find element
+    final controller = Get.find<EditorController>();
+    layout.Element? parent;
+    for(var layer in controller.currentLayout.value.layers) {
+      for(var eId in layer.elements.keys.toList()) {
+        if(eId == target) {
+          parent = layer.elements[eId]!;
+          break;
+        }
+      }
+    }
+
+    if(parent == null) return;
+    final spacingVal = double.tryParse(spacing.value.value ?? "0") ?? 0.0;
+
+    switch(alignment.value.value ?? 0) {
+      case 0: element.position.value = Offset(parent.position.value.dx, parent.position.value.dy - element.size.value.height - spacingVal); break;
+      case 1: element.position.value = Offset(parent.position.value.dx, parent.position.value.dy + parent.size.value.height + spacingVal); break;
+      case 2: element.position.value = Offset(parent.position.value.dx - element.size.value.width - spacingVal, parent.position.value.dy); break;
+      case 3: element.position.value = Offset(parent.position.value.dx + parent.size.value.width + spacingVal, parent.position.value.dy); break;
+    }
   }
 
 }

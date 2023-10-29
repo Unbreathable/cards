@@ -5,6 +5,7 @@ import 'package:cards/layouts/color_manager.dart';
 import 'package:cards/layouts/layout_manager.dart' as layout;
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/theme/list_selection.dart';
+import 'package:cards/theme/vertical_spacing.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -92,7 +93,84 @@ class TextElement extends layout.Element {
     final colorId = settings[1].value.value as String;
     final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
     final align = settings[2].value.value as int;
-    final fontSize = settings[3].value.value as double;
+    final fontSize = double.tryParse(settings[3].value.value ?? "17") ?? 17.0; 
+    final bold = settings[4].value.value as bool;
+    final italic = settings[5].value.value as bool;
+    final autoSize = settings[6].value.value as bool;
+    size.value = autoSize ? Size(size.value.width, fontSize * 1.6) : size.value;
+
+    return SizedBox(
+      width: size.value.width,
+      height: size.value.height,
+      child: Text(
+        text, 
+        style: TextStyle(
+          color: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value),
+          fontSize: fontSize, 
+          fontWeight: bold ? FontWeight.bold : FontWeight.normal, 
+          fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+          overflow: TextOverflow.ellipsis
+        ),
+        textAlign: alignmentMap[align],
+      ),
+    );
+  }
+
+  final alignmentMap = {
+    0: TextAlign.left,
+    1: TextAlign.center,
+    2: TextAlign.right
+  };
+
+  @override
+  List<layout.Setting> buildSettings() {
+    return [
+      layout.TextSetting("text", "Text", true, "Some text"),
+      layout.ColorSetting("color", "Text color", false),
+      layout.SelectionSetting("align", "Text alignment", false, 0, 
+        [
+          const SelectableItem("Left", Icons.format_align_left),
+          const SelectableItem("Center", Icons.format_align_center),
+          const SelectableItem("Right", Icons.format_align_right),
+        ]
+      ),
+      layout.TextSetting("size", "Font size", false, "20"),
+      layout.BoolSetting("bold", "Bold", false, false),
+      layout.BoolSetting("italic", "Italic", false, false),
+      layout.BoolSetting("autosize", "Auto size", false, false),
+    ];
+  }
+}
+
+class ParagraphElement extends layout.Element {
+  
+  ParagraphElement(String name) : super(name, 3, Icons.segment);
+  ParagraphElement.fromMap(int type, Map<String, dynamic> json) : super.fromMap(type, Icons.segment, json);
+
+  @override
+  void init() {
+    scalable = true;
+    if(size.value.width == 0) size.value = const Size(100, 30);
+  }
+
+  @override
+  void preProcess() {
+    final fontSize = double.tryParse(settings[3].value.value ?? "20") ?? 20.0;
+    final autoSize = settings[6].value.value as bool;
+    final lines = settings[7].value.value as String;
+    final lineCount = int.tryParse(lines) ?? 1;
+    size.value = autoSize ? Size(size.value.width, fontSize * 1.6 + fontSize * 1.5 * (lineCount - 1)) : size.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final text = settings[0].value.value as String;
+    final controller = Get.find<EditorController>();
+    final colorId = settings[1].value.value as String;
+    final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
+    final align = settings[2].value.value as int;
+    final fontSize = double.tryParse(settings[3].value.value ?? "20") ?? 20.0;
     final bold = settings[4].value.value as bool;
     final italic = settings[5].value.value as bool;
 
@@ -121,7 +199,7 @@ class TextElement extends layout.Element {
   @override
   List<layout.Setting> buildSettings() {
     return [
-      layout.TextSetting("text", "Text", true, "Some text"),
+      layout.ParagraphSetting("text", "Text", true, "Some text"),
       layout.ColorSetting("color", "Text color", false),
       layout.SelectionSetting("align", "Text alignment", false, 0, 
         [
@@ -130,9 +208,11 @@ class TextElement extends layout.Element {
           const SelectableItem("Right", Icons.format_align_right),
         ]
       ),
-      layout.NumberSetting("size", "Font size", false, 20.0, 15.0, 50.0),
+      layout.TextSetting("size", "Font size", false, "20"),
       layout.BoolSetting("bold", "Bold", false, false),
       layout.BoolSetting("italic", "Italic", false, false),
+      layout.BoolSetting("autosize", "Auto size", false, true),
+      layout.TextSetting("lines", "Lines", true, "1"),
     ];
   }
 }

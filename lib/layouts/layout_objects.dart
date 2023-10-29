@@ -170,6 +170,7 @@ abstract class Element {
 
   void init();
   List<Setting> buildSettings();
+  void preProcess() {}
   Widget build(BuildContext context);
 
   Widget buildParent(Widget child) {
@@ -251,6 +252,33 @@ class TextSetting extends Setting<String> {
       setValue(_controller!.text);
     });
     return FJTextField(
+      controller: _controller,
+      hintText: "Value",
+    );
+  }
+}
+
+class ParagraphSetting extends Setting<String> {
+  ParagraphSetting(String name, String description, bool exposed, String def) : super(name, description, SettingType.text, exposed, def);
+
+  TextEditingController? _controller;
+
+  @override
+  void dispose() {
+    if(_controller == null) return;
+    _controller!.dispose();
+    _controller = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _controller = TextEditingController();
+    _controller!.text = value.value ?? _defaultValue;
+    _controller!.addListener(() {
+      setValue(_controller!.text);
+    });
+    return FJTextField(
+      maxLines: 3,
       controller: _controller,
       hintText: "Value",
     );

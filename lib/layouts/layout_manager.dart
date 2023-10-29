@@ -26,6 +26,7 @@ class LayoutManager {
       case 0: return ImageElement.fromMap(type, json);
       case 1: return TextElement.fromMap(type, json);
       case 2: return BoxElement.fromMap(type, json);
+      case 3: return ParagraphElement.fromMap(type, json);
       default: throw Exception("Unknown element type: $type");
     }
   }

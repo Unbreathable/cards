@@ -17,13 +17,13 @@ class EffectAddDialog extends StatefulWidget {
 class _LayoutAddDialogState extends State<EffectAddDialog> {
 
   final _controller = TextEditingController(), _width = TextEditingController(), _height = TextEditingController();
-  final _error = Rx<String?>(null);
 
   final effects = [
     const SelectableItem("Padding", Icons.padding),
     const SelectableItem("Alignment", Icons.zoom_out_map),
     const SelectableItem("Inherit size", Icons.crop_square),
     const SelectableItem("Inherit position", Icons.radar),
+    const SelectableItem("Element alignment", Icons.format_align_center),
   ];
   final current = 0.obs;
 
@@ -89,6 +89,9 @@ class _LayoutAddDialogState extends State<EffectAddDialog> {
                           break;
                         case 3:
                           controller.currentElement.value?.addEffect(InheritPositionEffect());
+                          break;
+                        case 4:
+                          controller.currentElement.value?.addEffect(ElementAlignmentEffect());
                           break;
                       }
 
