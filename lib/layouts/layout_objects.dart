@@ -68,18 +68,19 @@ class Layout {
 
 class Layer {
   final String name;
-  late final elements = RxList<Element>();
+  late final elements = RxMap<String, Element>();
   final expanded = true.obs;
 
   Layer(this.name);
   Layer.fromMap(Map<String, dynamic> json) : name = json["name"] {
-    for(var element in json["elements"]) {
-      elements.add(LayoutManager.getElementFromMap(this, element));
+    for(var jsonElement in json["elements"]) {
+      final element = LayoutManager.getElementFromMap(this, jsonElement);
+      elements[element.id] = element;
     }
   }
   Map<String, dynamic> toMap() {
     List<Map<String, dynamic>> elementsMap = [];
-    for(var element in elements) {
+    for(var element in elements.values) {
       final map = element.toMap();
       map["type"] = element.type;
       elementsMap.add(map);
@@ -90,15 +91,22 @@ class Layer {
     };
   }
 
+  void addElement(Element element) {
+    elements[element.id] = element;
+  }
+
   void loadFromExported(Map<String, dynamic> json) {
-    for(var element in elements) {
-      element.loadFromExported(json["elements"][elements.indexOf(element)]);
+    for(var jsonElement in json["elements"]) {
+      final element = elements[jsonElement["id"]];
+      if(element == null) continue;
+      element.loadFromExported(jsonElement);
     }
   }
 }
 
 abstract class Element {
   final int type;
+  late final String id;
   final String name;
   final IconData icon;
   Layer parent = Layer("");
@@ -107,12 +115,14 @@ abstract class Element {
   final size = const Size(0, 0).obs;
   bool lockX = false, lockY = false;
   late final List<Setting> settings;
+  final effects = RxList<Effect>();
 
   Element(this.name, this.type, this.icon) {
+    id = generateRandomString(12);
     settings = buildSettings();
     init();
   }
-   Element.fromMap(this.type, this.icon, Map<String, dynamic> json) : name = json["name"] {
+   Element.fromMap(this.type, this.icon, Map<String, dynamic> json) : id = json["id"], name = json["name"] {
     settings = [];
     for(var setting in buildSettings()) {
       setting.fromJson(json["settings"]);
@@ -120,22 +130,30 @@ abstract class Element {
     }
     position.value = Offset(json["x"], json["y"]);
     size.value = Size(json["width"], json["height"]);
+    for(var effect in json["effects"]) {
+      effects.add(effectFromMap(effect));
+    }
     init();
   }
   Map<String, dynamic> toMap() {
-
     final settingsMap = <String, dynamic>{};
     for(var setting in settings) {
       setting.intoJson(settingsMap);
     }
+    final effectsMap = <Map<String, dynamic>>[];
+    for(var effect in effects) {
+      effectsMap.add(effect.toMap());
+    }
 
     return {
+      "id": id,
       "name": name,
       "x": position.value.dx,
       "y": position.value.dy,
       "width": size.value.width,
       "height": size.value.height,
-      "settings": settingsMap
+      "settings": settingsMap,
+      "effects": effectsMap
     };
   }
 
@@ -146,9 +164,21 @@ abstract class Element {
     }
   }
 
+  void addEffect(Effect effect) {
+    effects.add(effect);
+  }
+
   void init();
   List<Setting> buildSettings();
   Widget build(BuildContext context);
+
+  Widget buildParent(Widget child) {
+    return SizedBox(
+      width: size.value.width,
+      height: size.value.height,
+      child: child,
+    );
+  }
 }
 
 enum SettingType {
@@ -156,7 +186,9 @@ enum SettingType {
   text,
   selection,
   file,
-  bool
+  bool,
+  color,
+  element
 }
 
 abstract class Setting<T> {
@@ -333,7 +365,7 @@ class SelectionSetting extends Setting<int> {
 
 // String is the id of the color
 class ColorSetting extends Setting<String> {
-  ColorSetting(String name, String description, bool exposed) : super(name, description, SettingType.selection, exposed, "");
+  ColorSetting(String name, String description, bool exposed) : super(name, description, SettingType.color, exposed, "");
 
   @override
   Widget build(BuildContext context) {
@@ -350,5 +382,38 @@ class ColorSetting extends Setting<String> {
         Get.find<EditorController>().save();
       },
     ));
+  }
+}
+
+// String is the id of the element
+class ElementSetting extends Setting<String> {
+  ElementSetting(String name, String description, bool exposed) : super(name, description, SettingType.element, exposed, "");
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<EditorController>();
+
+    return Obx(() {
+
+      // Grab all elements in the current layout
+      final elements = <String, Element>{};
+      for(var layer in controller.currentLayout.value.layers) {
+        for(var element in layer.elements.values) {
+          elements[element.id] = element;
+        }
+      }
+
+      return ListSelection(
+        currentIndex: elements.keys.toList().indexOf(value.value ?? _defaultValue),
+        items: List.generate(elements.length, (index) {
+          final element = elements[elements.keys.toList()[index]]!;
+          return SelectableItem(element.name, element.icon);
+        }),
+        callback: (newVal, index) {
+          setValue(elements.keys.toList()[index]);
+          Get.find<EditorController>().save();
+        },
+      );
+    });
   }
 }

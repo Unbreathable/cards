@@ -2,7 +2,7 @@ import 'package:cards/layouts/layout_manager.dart';
 import 'package:cards/pages/editor/editor_canvas.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/pages/editor/sidebar/editor_sidebar.dart';
-import 'package:cards/pages/editor/element_settings_window.dart';
+import 'package:cards/pages/editor/element_settings/element_settings_window.dart';
 import 'package:cards/pages/renderer/layout_render_dialog.dart';
 import 'package:cards/theme/fj_button.dart';
 import 'package:cards/theme/vertical_spacing.dart';

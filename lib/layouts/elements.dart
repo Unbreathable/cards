@@ -28,18 +28,14 @@ class ImageElement extends layout.Element {
     final xOffset = settings[2].value.value as double;
     final yOffset = settings[3].value.value as double;
 
-    return SizedBox(
-      width: size.value.width,
-      height: size.value.height,
-      child: Image.file(File(path), fit: BoxFit.values[fit], alignment: AlignmentDirectional(xOffset, yOffset), errorBuilder: (context, error, stackTrace) {
-        return Placeholder(
-          color: Get.theme.colorScheme.error,
-          child: Center(
-            child: Text("Error loading image", style: Theme.of(context).textTheme.labelLarge),
-          ),
-        );
-      },)
-    );
+    return Image.file(File(path), fit: BoxFit.values[fit], alignment: AlignmentDirectional(xOffset, yOffset), errorBuilder: (context, error, stackTrace) {
+      return Placeholder(
+        color: Get.theme.colorScheme.error,
+        child: Center(
+          child: Text("Error loading image", style: Theme.of(context).textTheme.labelLarge),
+        ),
+      );
+    },);
   }
 
   final iconMap = {

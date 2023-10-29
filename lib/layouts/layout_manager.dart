@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cards/layouts/color_manager.dart';
+import 'package:cards/layouts/effects.dart';
 import 'package:cards/layouts/elements.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/theme/fj_button.dart';

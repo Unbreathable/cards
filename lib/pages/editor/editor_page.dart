@@ -3,7 +3,7 @@ import 'package:cards/pages/editor/editor_canvas.dart';
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/pages/editor/layout_export_dialog.dart';
 import 'package:cards/pages/editor/sidebar/editor_sidebar.dart';
-import 'package:cards/pages/editor/element_settings_window.dart';
+import 'package:cards/pages/editor/element_settings/element_settings_window.dart';
 import 'package:cards/theme/fj_button.dart';
 import 'package:cards/theme/vertical_spacing.dart';
 import 'package:flutter/gestures.dart';
@@ -272,11 +272,21 @@ class _EditorPageState extends State<EditorPage> {
                         end: 1,
                       )
                     ],
-                    child: Container(
-                      width: 380,
-                      color: Get.theme.colorScheme.onBackground,
-                      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                      child: current == null ? Center(child: Text("Select an element to modify", style: Get.theme.textTheme.bodyMedium)) : ElementSidebar(element: current)
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            width: 380,
+                            color: Get.theme.colorScheme.onBackground,
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                                child: current == null ? Center(child: Text("Select an element to modify", style: Get.theme.textTheme.bodyMedium)) : ElementSidebar(element: current)
+                              ),
+                            )
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 })

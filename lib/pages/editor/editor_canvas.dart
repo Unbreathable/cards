@@ -28,54 +28,67 @@ class _EditorCanvasState extends State<EditorCanvas> {
                 final layer = controller.currentLayout.value.layers[reverseIndex];
                 return Stack(
                   children: List.generate(layer.elements.length, (index) {
-                    final element = layer.elements[index];
+                    final element = layer.elements.values.toList()[index];
 
-                    return Obx(() => Positioned(
-                      left: element.position.value.dx.toDouble(),
-                      top: element.position.value.dy.toDouble(),
-                      child: GestureDetector(
-                        dragStartBehavior: DragStartBehavior.start,
-                        onTap: () => controller.currentElement.value = element,
-                        onPanUpdate: (details) {
-                          if(controller.currentElement.value == element && !controller.renderMode.value) {
-                            element.position.value = Offset(element.position.value.dx + (element.lockX ? 0 : details.delta.dx), element.position.value.dy + (element.lockY ? 0 :details.delta.dy));
-                          }
-                        },
-                        onPanEnd: (details) => controller.save(),
-                        child: Stack(
-                          children: [
-                            Container(
-                              decoration: controller.currentElement.value == element ? BoxDecoration(
-                                border: Border.all(
-                                  color: Get.theme.colorScheme.onPrimary,
-                                  width: 1,
-                                ),
-                              ) : null,
-                              padding: controller.currentElement.value == element ? null : const EdgeInsets.all(1),
-                              child: element.build(context)
-                            ),
-                            Visibility(
-                              visible: element.scalable && controller.currentElement.value == element && !controller.renderMode.value,
-                              child: Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: GestureDetector(
-                                  onPanUpdate: (details) {
-                                    element.size.value = Size(element.size.value.width + details.delta.dx, element.size.value.height + details.delta.dy);
-                                  },
-                                  onPanEnd: (details) => controller.save(),
-                                  child: Container(
-                                    width: 10,
-                                    height: 10,
+                    return Obx(() {
+
+                      for(var effect in element.effects) {
+                        effect.preProcess(element);
+                      }
+                      return Positioned(
+                        left: element.position.value.dx.toDouble(),
+                        top: element.position.value.dy.toDouble(),
+                        child: GestureDetector(
+                          dragStartBehavior: DragStartBehavior.start,
+                          onTap: () => controller.currentElement.value = element,
+                          onPanUpdate: (details) {
+                            if(controller.currentElement.value == element && !controller.renderMode.value) {
+                              element.position.value = Offset(element.position.value.dx + (element.lockX ? 0 : details.delta.dx), element.position.value.dy + (element.lockY ? 0 :details.delta.dy));
+                            }
+                          },
+                          onPanEnd: (details) => controller.save(),
+                          child: Stack(
+                            children: [
+                              Container(
+                                decoration: controller.currentElement.value == element ? BoxDecoration(
+                                  border: Border.all(
                                     color: Get.theme.colorScheme.onPrimary,
+                                    width: 1,
+                                  ),
+                                ) : null,
+                                padding: controller.currentElement.value == element ? null : const EdgeInsets.all(1),
+                                child: Obx(() {
+                                    Widget child = element.build(context);
+                                    for(var effect in element.effects) {
+                                      child = effect.apply(element, child);
+                                    }
+                                    return element.buildParent(child);
+                                  }
+                                )
+                              ),
+                              Visibility(
+                                visible: element.scalable && controller.currentElement.value == element && !controller.renderMode.value,
+                                child: Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onPanUpdate: (details) {
+                                      element.size.value = Size(element.size.value.width + details.delta.dx, element.size.value.height + details.delta.dy);
+                                    },
+                                    onPanEnd: (details) => controller.save(),
+                                    child: Container(
+                                      width: 10,
+                                      height: 10,
+                                      color: Get.theme.colorScheme.onPrimary,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            )
-                          ],
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    ));
+                      ); 
+                    });
                   }),
                 );
               }),

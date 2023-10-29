@@ -48,7 +48,7 @@ class EditorController extends GetxController {
       case 2: element = BoxElement(name); break;
       default: throw Exception("Unknown element type: $type");
     }
-    layer.elements.add(element);
+    layer.addElement(element);
     save();
   }
 

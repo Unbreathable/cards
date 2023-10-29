@@ -77,26 +77,26 @@ class _SidebarElementTabState extends State<SidebarElementTab> {
                             shrinkWrap: true,
                             itemCount: layer.elements.length,
                             itemBuilder: (context, index) {
-                              final element = layer.elements[index];
+                              final element = layer.elements.values.toList()[index];
                       
                               return Padding(
                                 padding: const EdgeInsets.only(top: elementSpacing),
                                 child: Obx(() =>
                                   Material(
                                     borderRadius: BorderRadius.circular(defaultSpacing),
-                                    color: controller.currentElement.value == layer.elements[index] ? Get.theme.colorScheme.primary : Colors.transparent,
+                                    color: controller.currentElement.value == element ? Get.theme.colorScheme.primary : Colors.transparent,
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(defaultSpacing),
                                       onTap: () {
-                                        controller.selectElement(layer.elements[index]);
+                                        controller.selectElement(element);
                                       },
                                       child: Padding(
                                         padding: const EdgeInsets.all(elementSpacing),
                                         child: Row(
                                           children: [
-                                            Icon(element.icon, color: controller.currentElement.value == layer.elements[index] ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,),
+                                            Icon(element.icon, color: controller.currentElement.value == element ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,),
                                             horizontalSpacing(elementSpacing),
-                                            Text(layer.elements[index].name, style: controller.currentElement.value == layer.elements[index] ? Get.theme.textTheme.labelMedium : Get.theme.textTheme.bodyMedium, textHeightBehavior: noTextHeight,),
+                                            Text(element.name, style: controller.currentElement.value == element ? Get.theme.textTheme.labelMedium : Get.theme.textTheme.bodyMedium, textHeightBehavior: noTextHeight,),
                                             const Expanded(child: SizedBox()),
                                             Visibility(
                                               visible: !controller.renderMode.value,
@@ -106,7 +106,7 @@ class _SidebarElementTabState extends State<SidebarElementTab> {
                                               ),
                                               child: IconButton(
                                                 onPressed: () {
-                                                  controller.deleteElement(layer, layer.elements[index]);
+                                                  controller.deleteElement(layer, element);
                                                 }, 
                                                 icon: const Icon(Icons.delete)
                                               ),
