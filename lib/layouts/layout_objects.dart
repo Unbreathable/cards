@@ -110,19 +110,24 @@ abstract class Element {
   final String name;
   final IconData icon;
   Layer parent = Layer("");
-  bool scalable = false;
-  final position =  const Offset(0, 0).obs;
+  bool scalable = false, scalableWidth = true, scalableHeight = true;
+  final position = const Offset(0, 0).obs;
   final size = const Size(0, 0).obs;
   bool lockX = false, lockY = false;
   late final List<Setting> settings;
   final effects = RxList<Effect>();
+
+  // Stored from layout
+  int xOverrides = 0, yOverrides = 0, widthOverrides = 0, heightOverrides = 0;
+  Offset? layoutOffset;
+  Size? layoutSize;
 
   Element(this.name, this.type, this.icon) {
     id = generateRandomString(12);
     settings = buildSettings();
     init();
   }
-   Element.fromMap(this.type, this.icon, Map<String, dynamic> json) : id = json["id"], name = json["name"] {
+  Element.fromMap(this.type, this.icon, Map<String, dynamic> json) : id = json["id"], name = json["name"] {
     settings = [];
     for(var setting in buildSettings()) {
       setting.fromJson(json["settings"]);
@@ -158,9 +163,10 @@ abstract class Element {
   }
 
   void loadFromExported(Map<String, dynamic> json) {
-    for(var setting in settings) {
-      if(!setting.exposed) return;
-      setting.fromJson(json["settings"]);
+    for(int i = 0; i < settings.length; i++) { // IDK why this doesn't work with a for in loop
+      final setting = settings[i];
+      if(!setting.exposed) continue;
+      settings[i].fromJson(json["settings"]);
     }
   }
 
@@ -172,6 +178,58 @@ abstract class Element {
   List<Setting> buildSettings();
   void preProcess() {}
   Widget build(BuildContext context);
+
+  void startLayout() {
+    layoutOffset = null;
+    layoutSize = null;
+    xOverrides = yOverrides = widthOverrides = heightOverrides = 0;
+  }
+
+  void setX(double x) {
+    layoutOffset = Offset(x, (layoutOffset ?? position.value).dy);
+    xOverrides++;
+  }
+
+  void setY(double y) {
+    layoutOffset = Offset((layoutOffset ?? position.value).dx, y);
+    yOverrides++;
+  }
+
+  void setWidth(double width) {
+    layoutSize = Size(width, (layoutSize ?? size.value).height);
+    widthOverrides++;
+  }
+
+  void setHeight(double height) {
+    layoutSize = Size((layoutSize ?? size.value).width, height);
+    heightOverrides++;
+  }
+
+  void applyLayout() {
+    final controller = Get.find<EditorController>();
+
+    if(position.value != layoutOffset && layoutOffset != null) {
+      controller.changed = true;
+    }
+    if(size.value != layoutSize && layoutSize != null) {
+      controller.changed = true;
+    }
+
+    position.value = layoutOffset ?? position.value;
+    size.value = layoutSize ?? size.value;
+    if(xOverrides > 1) {
+      controller.errorMessages.add("Element $name has $xOverrides x overrides");
+    }
+    if(yOverrides > 1) {
+      controller.errorMessages.add("Element $name has $yOverrides y overrides");
+    }
+    if(widthOverrides > 1) {
+      controller.errorMessages.add("Element $name has $widthOverrides width overrides");
+    }
+    if(heightOverrides > 1) {
+      controller.errorMessages.add("Element $name has $heightOverrides height overrides");
+    }
+  }
 
   Widget buildParent(Widget child) {
     return SizedBox(

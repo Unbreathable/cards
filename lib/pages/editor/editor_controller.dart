@@ -1,5 +1,6 @@
 import 'package:cards/layouts/elements.dart';
 import 'package:cards/layouts/layout_manager.dart';
+import 'package:cards/pages/editor/element_settings/effect_error_dialog.dart';
 import 'package:get/get.dart';
 
 class EditorController extends GetxController {
@@ -8,6 +9,10 @@ class EditorController extends GetxController {
   final currentElement = Rx<Element?>(null);
   final showSettings = false.obs;
   final renderMode = false.obs;
+
+  final errorMessages = <String>[].obs;
+  bool changed = false;
+  final loading = false.obs;
 
   void setCurrentLayout(Layout layout) {
     showSettings.value = false;
@@ -40,6 +45,45 @@ class EditorController extends GetxController {
     save();
   }
 
+  void redoLayout() async {
+    loading.value = true;
+    while(_doLayoutReorder()) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    loading.value = false;
+  }
+
+  bool _doLayoutReorder() {
+    changed = false;
+    errorMessages.clear();
+    for(var layer in currentLayout.value.layers) {
+      for(var element in layer.elements.values) {
+        element.startLayout();
+      }
+    }
+
+    for(var layer in currentLayout.value.layers) {
+      for(var element in layer.elements.values) {
+        element.preProcess();
+        for(var effect in element.effects) {
+          effect.preProcess(element);
+        }
+      }
+    }
+
+    for(var layer in currentLayout.value.layers) {
+      for(var element in layer.elements.values) {
+        element.applyLayout();
+      }
+    }
+
+    if(errorMessages.isNotEmpty) {
+      Get.dialog(const ErrorDialog());
+    }
+    save(layout: false);
+    return changed;
+  }
+
   void addElement(Layer layer, int type, String name) {
     Element? element;
     switch(type) {
@@ -47,6 +91,7 @@ class EditorController extends GetxController {
       case 1: element = TextElement(name); break;
       case 2: element = BoxElement(name); break;
       case 3: element = ParagraphElement(name); break;
+      case 4: element = HiderElement(name); break;
       default: throw Exception("Unknown element type: $type");
     }
     layer.addElement(element);
@@ -58,7 +103,11 @@ class EditorController extends GetxController {
     save();
   }
 
-  void save() {
+  void save({bool layout = true}) {
+    if(layout) {
+      redoLayout();
+      return;
+    }
     if(renderMode.value) {
       LayoutManager.saveExportedLayout(currentLayout.value as ExportedLayout);
     } else {
@@ -67,6 +116,7 @@ class EditorController extends GetxController {
   }
 
   void selectElement(Element element) {
+    if(loading.value) return;
     currentElement.value = element;
   }
 

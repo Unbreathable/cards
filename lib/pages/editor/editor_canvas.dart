@@ -32,11 +32,6 @@ class _EditorCanvasState extends State<EditorCanvas> {
                       final element = layer.elements.values.toList()[index];
                 
                       return Obx(() {
-                
-                        element.preProcess();
-                        for(var effect in element.effects) {
-                          effect.preProcess(element);
-                        }
                         return Positioned(
                           left: element.position.value.dx.toDouble(),
                           top: element.position.value.dy.toDouble(),
@@ -75,7 +70,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
                                     right: 0,
                                     child: GestureDetector(
                                       onPanUpdate: (details) {
-                                        element.size.value = Size(element.size.value.width + details.delta.dx, element.size.value.height + details.delta.dy);
+                                        element.size.value = Size(element.size.value.width + (element.scalableWidth ? details.delta.dx : 0), element.size.value.height + (element.scalableHeight ? details.delta.dy : 0));
                                       },
                                       onPanEnd: (details) => controller.save(),
                                       child: Container(

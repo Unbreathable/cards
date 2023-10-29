@@ -5,6 +5,7 @@ import 'package:cards/pages/editor/layout_export_dialog.dart';
 import 'package:cards/pages/editor/sidebar/editor_sidebar.dart';
 import 'package:cards/pages/editor/element_settings/element_settings_window.dart';
 import 'package:cards/theme/fj_button.dart';
+import 'package:cards/theme/icon_button.dart';
 import 'package:cards/theme/vertical_spacing.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,8 @@ class _EditorPageState extends State<EditorPage> {
   void loadLayout() async {
     layout.value = await LayoutManager.loadLayout(widget.name);
     Get.find<EditorController>().setCurrentLayout(layout.value!);
+    await Future.delayed(500.ms);
+    Get.find<EditorController>().redoLayout();
   }
 
   @override
@@ -167,6 +170,13 @@ class _EditorPageState extends State<EditorPage> {
                 const Expanded(child: SizedBox()),
                 Row(
                   children: [
+                    LoadingIconButton(
+                      loading: Get.find<EditorController>().loading,
+                      color: Get.theme.colorScheme.onPrimary,
+                      icon: Icons.save,
+                      onTap: () => Get.find<EditorController>().redoLayout(),
+                    ),
+                    horizontalSpacing(defaultSpacing),
                     Obx(() =>
                       Get.find<EditorController>().showSettings.value ?
                       IconButton.filled(

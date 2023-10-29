@@ -5,7 +5,6 @@ import 'package:cards/layouts/color_manager.dart';
 import 'package:cards/layouts/layout_manager.dart' as layout;
 import 'package:cards/pages/editor/editor_controller.dart';
 import 'package:cards/theme/list_selection.dart';
-import 'package:cards/theme/vertical_spacing.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -86,6 +85,14 @@ class TextElement extends layout.Element {
   }
 
   @override
+  void preProcess() {
+    final fontSize = double.tryParse(settings[3].value.value ?? "17") ?? 17.0; 
+    final autoSize = settings[6].value.value as bool;
+    scalableHeight = false;
+    setHeight(autoSize ? fontSize * 1.6 : size.value.height);
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     final text = settings[0].value.value as String;
@@ -103,7 +110,7 @@ class TextElement extends layout.Element {
       width: size.value.width,
       height: size.value.height,
       child: Text(
-        text, 
+        text,
         style: TextStyle(
           color: color.getColor(1.0, controller.currentLayout.value.colorManager.saturation.value),
           fontSize: fontSize, 
@@ -159,7 +166,8 @@ class ParagraphElement extends layout.Element {
     final autoSize = settings[6].value.value as bool;
     final lines = settings[7].value.value as String;
     final lineCount = int.tryParse(lines) ?? 1;
-    size.value = autoSize ? Size(size.value.width, fontSize * 1.6 + fontSize * 1.5 * (lineCount - 1)) : size.value;
+    scalableHeight = false;
+    setHeight(autoSize ? fontSize * 1.6 + fontSize * 1.5 * (lineCount - 1) : size.value.height);
   }
 
   @override
@@ -289,6 +297,64 @@ class BoxElement extends layout.Element {
       layout.NumberSetting("padding", "Padding", false, 0.0, 0.0, 50.0),
       layout.BoolSetting("full_width", "Full width", false, false),
       layout.BoolSetting("full_height", "Full height", false, false),
+    ];
+  }
+
+}
+
+class HiderElement extends layout.Element {
+
+  HiderElement(String name) : super(name, 4, Icons.visibility_off);
+  HiderElement.fromMap(int type, Map<String, dynamic> json) : super.fromMap(type, Icons.visibility_off, json);
+
+  @override
+  void init() {
+    scalable = true;
+    if(size.value.width == 0) size.value = const Size(100, 100);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final controller = Get.find<EditorController>();
+    final colorId = settings[0].value.value as String;
+    final color = controller.currentLayout.value.colorManager.colors[colorId] ?? PickedColor("error");
+    final fullWidth = settings[1].value.value as bool;
+    final fullHeight = settings[2].value.value as bool;
+    final visible = settings[3].value.value as bool;  
+
+    if(fullWidth) {
+      position.value = Offset(-1, position.value.dy);
+      size.value = Size(controller.currentLayout.value.width.toDouble(), size.value.height);
+      lockX = true;
+    } else {
+      lockX = false;
+    }
+
+    if(fullHeight) {
+      position.value = Offset(position.value.dx, -1);
+      size.value = Size(size.value.width, controller.currentLayout.value.height.toDouble());
+      lockY = true;
+    } else {
+      lockY = false;
+    }
+
+    return Container(
+      width: size.value.width,
+      height: size.value.height,
+      decoration: BoxDecoration(
+        color: color.getColor(visible ? 0.0 : 1.0, controller.currentLayout.value.colorManager.saturation.value),
+      ),
+    );
+  }
+
+  @override
+  List<layout.Setting> buildSettings() {
+    return [
+      layout.ColorSetting("color", "Color", false),
+      layout.BoolSetting("full_width", "Full width", false, false),
+      layout.BoolSetting("full_height", "Full height", false, false),
+      layout.BoolSetting("visibile", "Visible", true, false),
     ];
   }
 

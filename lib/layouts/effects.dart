@@ -112,15 +112,15 @@ class AlignmentEffect extends Effect {
     element.lockY = alignY != 0;
 
     switch(alignX) {
-      case 1: element.position.value = Offset(0, element.position.value.dy); break;
-      case 2: element.position.value = Offset((controller.currentLayout.value.width - element.size.value.width) / 2, element.position.value.dy); break;
-      case 3: element.position.value = Offset(controller.currentLayout.value.width - element.size.value.width - 2, element.position.value.dy); break;
+      case 1: element.setX(-1); break;
+      case 2: element.setX((controller.currentLayout.value.width - element.size.value.width) / 2); break;
+      case 3: element.setX(controller.currentLayout.value.width - element.size.value.width); break;
     }
 
     switch(alignY) {
-      case 1: element.position.value = Offset(element.position.value.dx, 0); break;
-      case 2: element.position.value = Offset(element.position.value.dx, (controller.currentLayout.value.height - element.size.value.height) / 2); break;
-      case 3: element.position.value = Offset(element.position.value.dx, controller.currentLayout.value.height - element.size.value.height - 2); break;
+      case 1: element.setY(-1); break;
+      case 2: element.setY((controller.currentLayout.value.height - element.size.value.height) / 2); break;
+      case 3: element.setY(controller.currentLayout.value.height - element.size.value.height); break;
     }
   }
 }
@@ -161,10 +161,12 @@ class InheritSizeEffect extends Effect {
     }
 
     final extra = double.tryParse(this.extra.value.value ?? "0") ?? 0.0;
-    element.size.value = Size(
-      inheritWidth.value.value == true ? parent.size.value.width + extra : element.size.value.width,
-      inheritHeight.value.value == true ? parent.size.value.height + extra : element.size.value.height,
-    );
+    if(inheritWidth.value.value == true) {
+      element.setWidth(parent.size.value.width + extra);
+    }
+    if(inheritHeight.value.value == true) {
+      element.setHeight(parent.size.value.height + extra);
+    }
   }
 
 }
@@ -205,10 +207,12 @@ class InheritPositionEffect extends Effect {
     }
 
     final extra = double.tryParse(this.extra.value.value ?? "0") ?? 0.0;
-    element.position.value = Offset(
-      inheritX.value.value == true ? parent.position.value.dx + extra : element.position.value.dx,
-      inheritY.value.value == true ? parent.position.value.dy + extra : element.position.value.dy,
-    );
+    if(inheritX.value.value == true) {
+      element.setX(parent.position.value.dx + extra);
+    }
+    if(inheritY.value.value == true) {
+      element.setY(parent.position.value.dy + extra);
+    }
   }
 
 }
@@ -254,10 +258,22 @@ class ElementAlignmentEffect extends Effect {
     final spacingVal = double.tryParse(spacing.value.value ?? "0") ?? 0.0;
 
     switch(alignment.value.value ?? 0) {
-      case 0: element.position.value = Offset(parent.position.value.dx, parent.position.value.dy - element.size.value.height - spacingVal); break;
-      case 1: element.position.value = Offset(parent.position.value.dx, parent.position.value.dy + parent.size.value.height + spacingVal); break;
-      case 2: element.position.value = Offset(parent.position.value.dx - element.size.value.width - spacingVal, parent.position.value.dy); break;
-      case 3: element.position.value = Offset(parent.position.value.dx + parent.size.value.width + spacingVal, parent.position.value.dy); break;
+      case 0: 
+        element.setX(parent.position.value.dx);
+        element.setY(parent.position.value.dy - element.size.value.height - spacingVal); 
+        break;
+      case 1: 
+        element.setX(parent.position.value.dx);
+        element.setY(parent.position.value.dy + parent.size.value.height + spacingVal); 
+        break;
+      case 2: 
+        element.setX(parent.position.value.dx - element.size.value.width - spacingVal); 
+        element.setY(parent.position.value.dy);
+        break;
+      case 3: 
+        element.setX(parent.position.value.dx + parent.size.value.width + spacingVal); 
+        element.setY(parent.position.value.dy);
+        break;
     }
   }
 
