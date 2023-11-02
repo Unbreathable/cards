@@ -2,6 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 const noTextHeight = TextHeightBehavior(
@@ -44,4 +45,19 @@ String generateRandomString(int length) {
       (index) => availableChars[random.nextInt(availableChars.length)]).join();
 
   return randomString;
+}
+
+class ExpandEffect extends CustomEffect {
+
+  ExpandEffect({Curve? curve, Duration? duration, Axis? axis, Alignment? alignment, Duration? delay}) : super(builder: (context, value, child) {
+    return ClipRect(
+      child: Align(
+        alignment: alignment ?? Alignment.topCenter,
+        heightFactor: axis == Axis.vertical ? max(value, 0.0) : null,
+        widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
+        child: child,
+      ),
+    );
+  }, curve: curve, duration: duration, delay: delay);
+
 }

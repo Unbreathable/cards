@@ -41,7 +41,6 @@ class _EditorSidebarState extends State<EditorSidebar> {
               ),
               onTap: () {
                 _selected.value = "Layers";
-                
               },
             ),
             horizontalSpacing(elementSpacing),
@@ -60,6 +59,9 @@ class _EditorSidebarState extends State<EditorSidebar> {
             Obx(() =>
               Visibility(
                 visible: _selected.value == "Layers" && !controller.renderMode.value,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
                 child: IconButton(
                   key: _editKey,
                   icon: const Icon(Icons.edit),
@@ -95,7 +97,9 @@ class _EditorSidebarState extends State<EditorSidebar> {
         //* Layers
         verticalSpacing(sectionSpacing),
         Expanded(
-          child: Obx(() => tabs[_selected.value]!),
+          child: SingleChildScrollView(
+            child: Obx(() => tabs[_selected.value]!)
+          ),
         )
       ],
     );

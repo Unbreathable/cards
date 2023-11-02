@@ -18,6 +18,7 @@ class _SidebarElementTabState extends State<SidebarElementTab> {
     return GetX<EditorController>(
       builder: (controller) {
         return ListView.builder(
+          shrinkWrap: true,
           itemCount: controller.currentLayout.value.layers.length,
           itemBuilder: (context, index) {
             final layer = controller.currentLayout.value.layers[index];
@@ -68,8 +69,15 @@ class _SidebarElementTabState extends State<SidebarElementTab> {
                       ],
                     ),
             
-                    Visibility(
-                      visible: expanded,
+                    Animate(
+                      effects: [
+                        ExpandEffect(
+                          axis: Axis.vertical,
+                          duration: 250.ms,
+                          curve: Curves.easeInOut,
+                        )
+                      ],
+                      target: expanded ? 1 : 0,
                       child: Padding(
                         padding: const EdgeInsets.only(left: sectionSpacing),
                         child: Obx(() =>

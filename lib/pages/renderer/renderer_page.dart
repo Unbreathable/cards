@@ -160,21 +160,11 @@ class _EditorPageState extends State<RendererPage> {
                   return Animate(
                     target: controller.showSettings.value ? 1 : 0,
                     effects: [
-                      CustomEffect(
+                      ExpandEffect(       
+                        axis: Axis.horizontal,
+                        alignment: Alignment.topLeft,              
                         curve: Curves.easeInOut,
-                        duration: 250.ms,
-                        builder: (context, value, child) {
-                          return SizedBox(
-                            width: 380 * value,
-                            child: child,
-                          );
-                        },
-                      ),
-                      FadeEffect(
-                        curve: Curves.easeOut,
-                        delay: 150.ms,
-                        begin: 0,
-                        end: 1,
+                        duration: 350.ms,
                       )
                     ],
                     child: Container(

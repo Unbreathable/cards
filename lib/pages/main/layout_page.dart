@@ -45,7 +45,6 @@ class _LayoutPageState extends State<LayoutPage> {
                       ),
                       onTap: () {
                         selected.value = "Layouts";
-                        
                       },
                     ),
                     horizontalSpacing(elementSpacing),
